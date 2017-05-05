@@ -1,0 +1,478 @@
+./adjustInventory.sh: line 4: : command not found
+04-30-2017 
+./adjustInventory.sh: line 7: : command not found
+[0;31mAdjusting Inventory files  000009_RGIS.csv  with in-between operations.....[0m 
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000009_RGIS.csv .....[0m
+./adjustInventory.sh: line 11: : command not found
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31m
+^[[1m--- GOLD COUNTING integration psifa98p  ---^[[0m
+[0m
+started at 30/04/17 23:28
+Counting list generated.
+GOLD batch execution PSIFA98P...
+Counting: 198
+Counting: 227
+Counting: 189
+Counting: 194
+Counting: 207
+Counting: 209
+Counting: 213
+Counting: 217
+Counting: 218
+Counting: 222
+Counting: 205
+Counting: 210
+Counting: 211
+Counting: 220
+Counting: 223
+Counting: 224
+Counting: 229
+Counting: 191
+Counting: 193
+Counting: 201
+Counting: 215
+Counting: 230
+Counting: 206
+Counting: 212
+Counting: 226
+Counting: 231
+Counting: 232
+Counting: 188
+Counting: 199
+Counting: 200
+Counting: 214
+Counting: 228
+Counting: 190
+Counting: 192
+Counting: 195
+Counting: 196
+Counting: 202
+Counting: 203
+Counting: 216
+Counting: 221
+Counting: 225
+Counting: 197
+Counting: 204
+Counting: 208
+Counting: 219
+[0;31mGOLD counting execution completed -  45 counts.[0m
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+05-01-2017
+[0;31mProcessing Third Party inventory file ...... [2017043017_PICS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 03:16:08 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 26116.
+
+Table THIRDPARTY_COUNTING:
+  26116 Rows successfully loaded.
+
+Check the log file:
+  logs/2017043017_PICS.csv.log
+for more information about the load.
+[0;31m[2017043017_PICS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   2017043017_PICS.csv .....[0m
+[0;31mProcessing Third Party inventory file ...... [201704307_PICS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 03:21:33 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 26777.
+
+Table THIRDPARTY_COUNTING:
+  26777 Rows successfully loaded.
+
+Check the log file:
+  logs/201704307_PICS.csv.log
+for more information about the load.
+[0;31m[201704307_PICS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   201704307_PICS.csv .....[0m
+05-01-2017
+[0;31mProcessing Third Party inventory file ...... [000001_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 03:54:15 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 22443.
+
+Table THIRDPARTY_COUNTING:
+  22443 Rows successfully loaded.
+
+Check the log file:
+  logs/000001_RGIS.csv.log
+for more information about the load.
+[0;31m[000001_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000001_RGIS.csv .....[0m
+[0;31mProcessing Third Party inventory file ...... [000004_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 03:58:26 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 23626.
+
+Table THIRDPARTY_COUNTING:
+  23626 Rows successfully loaded.
+
+Check the log file:
+  logs/000004_RGIS.csv.log
+for more information about the load.
+[0;31m[000004_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000004_RGIS.csv .....[0m
+[0;31mProcessing Third Party inventory file ...... [000005_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 04:03:05 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 24509.
+
+Table THIRDPARTY_COUNTING:
+  24509 Rows successfully loaded.
+
+Check the log file:
+  logs/000005_RGIS.csv.log
+for more information about the load.
+[0;31m[000005_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000005_RGIS.csv .....[0m
+[0;31mProcessing Third Party inventory file ...... [000010_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 04:07:47 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 22841.
+
+Table THIRDPARTY_COUNTING:
+  22841 Rows successfully loaded.
+
+Check the log file:
+  logs/000010_RGIS.csv.log
+for more information about the load.
+[0;31m[000010_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000010_RGIS.csv .....[0m
+[0;31mProcessing Third Party inventory file ...... [000011_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 04:12:09 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 18729.
+
+Table THIRDPARTY_COUNTING:
+  18729 Rows successfully loaded.
+
+Check the log file:
+  logs/000011_RGIS.csv.log
+for more information about the load.
+[0;31m[000011_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000011_RGIS.csv .....[0m
+[0;31mProcessing Third Party inventory file ...... [000016_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 04:15:51 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 23072.
+
+Table THIRDPARTY_COUNTING:
+  23072 Rows successfully loaded.
+
+Check the log file:
+  logs/000016_RGIS.csv.log
+for more information about the load.
+[0;31m[000016_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000016_RGIS.csv .....[0m
+[0;31mProcessing Third Party inventory file ...... [000018_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 04:20:25 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 24334.
+
+Table THIRDPARTY_COUNTING:
+  24334 Rows successfully loaded.
+
+Check the log file:
+  logs/000018_RGIS.csv.log
+for more information about the load.
+[0;31m[000018_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000018_RGIS.csv .....[0m
+[0;31mProcessing Third Party inventory file ...... [000019_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 04:25:09 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 13062.
+
+Table THIRDPARTY_COUNTING:
+  13062 Rows successfully loaded.
+
+Check the log file:
+  logs/000019_RGIS.csv.log
+for more information about the load.
+[0;31m[000019_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000019_RGIS.csv .....[0m
+[0;31mProcessing Third Party inventory file ...... [000041_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 04:27:48 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 21215.
+
+Table THIRDPARTY_COUNTING:
+  21215 Rows successfully loaded.
+
+Check the log file:
+  logs/000041_RGIS.csv.log
+for more information about the load.
+[0;31m[000041_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000041_RGIS.csv .....[0m
+[0;31m
+^[[1m--- GOLD COUNTING integration psifa98p  ---^[[0m
+[0m
+started at 01/05/17 04:46
+Counting list generated.
+GOLD batch execution PSIFA98P...
+Counting: 245
+Counting: 247
+Counting: 252
+Counting: 249
+Counting: 250
+Counting: 251
+Counting: 253
+Counting: 246
+Counting: 248
+[0;31mGOLD counting execution completed -  9 counts.[0m
+05-01-2017
+[0;31mProcessing Third Party inventory file ...... [000043_RGIS.csv][0m
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 04:52:17 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Path used:      Direct
+
+Load completed - logical record count 24202.
+
+Table THIRDPARTY_COUNTING:
+  24202 Rows successfully loaded.
+
+Check the log file:
+  logs/000043_RGIS.csv.log
+for more information about the load.
+[0;31m[000043_RGIS.csv] ........ DONE.[0m
+[0;31mProcessing the inventory files integrated  .....[0m
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+
+PL/SQL procedure successfully completed.
+
+
+  O_RETURN
+----------
+	 0
+
+[0;31mInventory files integrated   000043_RGIS.csv .....[0m
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+PAS EN MODIFICATION 
+[0;31m
+^[[1m--- GOLD COUNTING integration psifa98p  ---^[[0m
+[0m
+started at 01/05/17 05:18
+Counting list generated.
+GOLD batch execution PSIFA98P...
+Counting: 254
+[0;31mGOLD counting execution completed -  1 counts.[0m
+PAS EN MODIFICATION 

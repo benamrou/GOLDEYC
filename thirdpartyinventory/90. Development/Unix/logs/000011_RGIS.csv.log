@@ -1,0 +1,75 @@
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Mon May 1 04:12:09 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   000011_RGIS.csv.ctl
+Data File:      /home/hnpcen/gaia/RECEIVED/000011_RGIS.csv
+  Bad File:     logs/000011_RGIS.csv.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 1
+Errors allowed: 100000
+Continuation:    none specified
+Path used:      Direct
+
+Table THIRDPARTY_COUNTING, loaded from every logical record.
+Insert option in effect for this table: APPEND
+TRAILING NULLCOLS option in effect
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+CNTUPC                              FIRST     *   ,       CHARACTER            
+CNTDESC                              NEXT     *   ,       CHARACTER            
+CNTCAT                               NEXT     *   ,       CHARACTER            
+CNTCOST                              NEXT     *   ,       CHARACTER            
+CNTCODE1                             NEXT     *   ,       CHARACTER            
+CNTCODE2                             NEXT     *   ,       CHARACTER            
+CNTLOC                               NEXT     *   ,       CHARACTER            
+CNTDEPT                              NEXT     *   ,       CHARACTER            
+CNTCODE3                             NEXT     *   ,       CHARACTER            
+CNTCOST2                             NEXT     *   ,       CHARACTER            
+CNTQTY                               NEXT     *   ,       CHARACTER            
+CNTEXTCOST                           NEXT     *   ,       CHARACTER            
+CNTCNUF                              NEXT     *   ,       CHARACTER            
+CNTCODE4                             NEXT     *   ,       CHARACTER            
+CNTCODE5                             NEXT     *   ,       CHARACTER            
+CNTDEPTDESC                          NEXT     *   ,       CHARACTER            
+CNT500                               NEXT     *   ,       CHARACTER            
+CNTFILE                                                   CONSTANT
+    Value is '000011_RGIS.csv'
+CNTLGFI                                                   RECNUM
+CNTDCRE                                                   SYSDATE
+CNTDMAJ                                                   SYSDATE
+CNTUTIL                                                   CONSTANT
+    Value is '3RDCNT'
+
+The following index(es) on table THIRDPARTY_COUNTING were processed:
+index HNCUSTOM.THIRDPARTY_COUNTING_I01 loaded successfully with 18729 keys
+
+Table THIRDPARTY_COUNTING:
+  18729 Rows successfully loaded.
+  0 Rows not loaded due to data errors.
+  0 Rows not loaded because all WHEN clauses were failed.
+  0 Rows not loaded because all fields were null.
+
+Bind array size not used in direct path.
+Column array  rows :    5000
+Stream buffer bytes:  256000
+Read   buffer bytes:60000000
+
+Total logical records skipped:          1
+Total logical records read:         18729
+Total logical records rejected:         0
+Total logical records discarded:        0
+Total stream buffers loaded by SQL*Loader main thread:        5
+Total stream buffers loaded by SQL*Loader load thread:        7
+
+Run began on Mon May 01 04:12:09 2017
+Run ended on Mon May 01 04:12:10 2017
+
+Elapsed time was:     00:00:01.17
+CPU time was:         00:00:00.04

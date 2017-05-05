@@ -1,0 +1,66 @@
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Sun Nov 6 22:24:31 2016
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   controlFile/picsinv.ctl
+Data File:      /home/hntcen/gaia/RECEIVED/PICS_INV_Oct_2016.csv
+  Bad File:     logs/PICS_INV_Oct_2016.csv.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 1
+Errors allowed: 100000
+Continuation:    none specified
+Path used:      Direct
+
+Table PICSINV, loaded from every logical record.
+Insert option in effect for this table: APPEND
+TRAILING NULLCOLS option in effect
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+PICSUPC                             FIRST     *   ,       CHARACTER            
+PICSDESC                             NEXT     *   ,       CHARACTER            
+PICSCAT                              NEXT     *   ,       CHARACTER            
+PICSCOST                             NEXT     *   ,       CHARACTER            
+PICSCODE1                            NEXT     *   ,       CHARACTER            
+PICSCODE2                            NEXT     *   ,       CHARACTER            
+PICSLOC                              NEXT     *   ,       CHARACTER            
+PICSDEPT                             NEXT     *   ,       CHARACTER            
+PICSCODE3                            NEXT     *   ,       CHARACTER            
+PICSCOST2                            NEXT     *   ,       CHARACTER            
+PICSQTY                              NEXT     *   ,       CHARACTER            
+PICSEXTCOST                          NEXT     *   ,       CHARACTER            
+PICSCNUF                             NEXT     *   ,       CHARACTER            
+PICSCODE4                            NEXT     *   ,       CHARACTER            
+PICSCODE5                            NEXT     *   ,       CHARACTER            
+PICSDEPTDESC                         NEXT     *   ,       CHARACTER            
+PICS500                              NEXT     *   ,       CHARACTER            
+
+
+Table PICSINV:
+  174031 Rows successfully loaded.
+  0 Rows not loaded due to data errors.
+  0 Rows not loaded because all WHEN clauses were failed.
+  0 Rows not loaded because all fields were null.
+
+Bind array size not used in direct path.
+Column array  rows :    5000
+Stream buffer bytes:  256000
+Read   buffer bytes: 1048576
+
+Total logical records skipped:          1
+Total logical records read:        174031
+Total logical records rejected:         0
+Total logical records discarded:        0
+Total stream buffers loaded by SQL*Loader main thread:       42
+Total stream buffers loaded by SQL*Loader load thread:       57
+
+Run began on Sun Nov 06 22:24:31 2016
+Run ended on Sun Nov 06 22:24:33 2016
+
+Elapsed time was:     00:00:02.26
+CPU time was:         00:00:00.17
