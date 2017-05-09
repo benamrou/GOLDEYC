@@ -108,6 +108,7 @@ BEGIN
           IF v_store != i_cntloc THEN
             COMMIT;
             v_numCounting := SEQCOUNTING.NEXTVAL; -- New store => new interface inventory code
+						v_store := i_ivfsite;
           END IF;
            v_store := i_cntloc;
            v_inventoryName := to_char(SYSDATE-1,'RRRR/MM/DD') || ' STORE #' || v_store || ' - ' || i_cntcompany || ' CNT INVENTORY';
@@ -176,12 +177,12 @@ BEGIN
                     i_upctestSV,
                      4, i_saleprice); /* IVFCACT */
                      /* field IVFCACT (action code) defines the actions that the programme has to carry out:
-                           1 ¿ initialisation of the inventory
-                           2 ¿ initialisation of and copy of the theoretical stock or only a copy of the stock if the inventory already exists
-                           3 ¿ initialisation, copy of the theoretical stock and of the quantities in INVSAISIE or only copy of the quantities in INVSAISIE if the inventory already exists
-                           4 ¿ initialisation + copy ofthe theoretical stock + input of the quantities + validation of the input + update of the stock
-                           5 ¿ input of the quantities for an existing inventory
-                           6 ¿ modification of an existing inventory 9 ¿ deletion of an existing inventory
+                           1 ï¿½ initialisation of the inventory
+                           2 ï¿½ initialisation of and copy of the theoretical stock or only a copy of the stock if the inventory already exists
+                           3 ï¿½ initialisation, copy of the theoretical stock and of the quantities in INVSAISIE or only copy of the quantities in INVSAISIE if the inventory already exists
+                           4 ï¿½ initialisation + copy ofthe theoretical stock + input of the quantities + validation of the input + update of the stock
+                           5 ï¿½ input of the quantities for an existing inventory
+                           6 ï¿½ modification of an existing inventory 9 ï¿½ deletion of an existing inventory
                       */
               v_flagLine := flagLine(in_num_log, 101, i_cntfile, i_cntlgfi);
               EXCEPTION
@@ -247,12 +248,12 @@ BEGIN
                       i_svcode,
                       4); /* IVFCACT */
                        /* field IVFCACT (action code) defines the actions that the programme has to carry out:
-                             1 ¿ initialisation of the inventory
-                             2 ¿ initialisation of and copy of the theoretical stock or only a copy of the stock if the inventory already exists
-                             3 ¿ initialisation, copy of the theoretical stock and of the quantities in INVSAISIE or only copy of the quantities in INVSAISIE if the inventory already exists
-                             4 ¿ initialisation + copy ofthe theoretical stock + input of the quantities + validation of the input + update of the stock
-                             5 ¿ input of the quantities for an existing inventory
-                             6 ¿ modification of an existing inventory 9 ¿ deletion of an existing inventory
+                             1 ï¿½ initialisation of the inventory
+                             2 ï¿½ initialisation of and copy of the theoretical stock or only a copy of the stock if the inventory already exists
+                             3 ï¿½ initialisation, copy of the theoretical stock and of the quantities in INVSAISIE or only copy of the quantities in INVSAISIE if the inventory already exists
+                             4 ï¿½ initialisation + copy ofthe theoretical stock + input of the quantities + validation of the input + update of the stock
+                             5 ï¿½ input of the quantities for an existing inventory
+                             6 ï¿½ modification of an existing inventory 9 ï¿½ deletion of an existing inventory
                         */
                   v_flagLine := flagLine(in_num_log, 102, i_cntfile, i_cntlgfi);
                   EXCEPTION
@@ -318,12 +319,12 @@ BEGIN
                       i_svcode,
                       4, i_saleprice );/* IVFCACT */
                        /* field IVFCACT (action code) defines the actions that the programme has to carry out:
-                             1 ¿ initialisation of the inventory
-                             2 ¿ initialisation of and copy of the theoretical stock or only a copy of the stock if the inventory already exists
-                             3 ¿ initialisation, copy of the theoretical stock and of the quantities in INVSAISIE or only copy of the quantities in INVSAISIE if the inventory already exists
-                             4 ¿ initialisation + copy ofthe theoretical stock + input of the quantities + validation of the input + update of the stock
-                             5 ¿ input of the quantities for an existing inventory
-                             6 ¿ modification of an existing inventory 9 ¿ deletion of an existing inventory
+                             1 ï¿½ initialisation of the inventory
+                             2 ï¿½ initialisation of and copy of the theoretical stock or only a copy of the stock if the inventory already exists
+                             3 ï¿½ initialisation, copy of the theoretical stock and of the quantities in INVSAISIE or only copy of the quantities in INVSAISIE if the inventory already exists
+                             4 ï¿½ initialisation + copy ofthe theoretical stock + input of the quantities + validation of the input + update of the stock
+                             5 ï¿½ input of the quantities for an existing inventory
+                             6 ï¿½ modification of an existing inventory 9 ï¿½ deletion of an existing inventory
                         */
                   v_flagLine := flagLine(in_num_log, 101, i_cntfile, i_cntlgfi);
                   EXCEPTION
@@ -568,12 +569,12 @@ BEGIN
                 NULL, NULL, i_ivfcexv,
                  4); /* IVFCACT */
                  /* field IVFCACT (action code) defines the actions that the programme has to carry out:
-                       1 ¿ initialisation of the inventory
-                       2 ¿ initialisation of and copy of the theoretical stock or only a copy of the stock if the inventory already exists
-                       3 ¿ initialisation, copy of the theoretical stock and of the quantities in INVSAISIE or only copy of the quantities in INVSAISIE if the inventory already exists
-                       4 ¿ initialisation + copy ofthe theoretical stock + input of the quantities + validation of the input + update of the stock
-                       5 ¿ input of the quantities for an existing inventory
-                       6 ¿ modification of an existing inventory 9 ¿ deletion of an existing inventory
+                       1 ï¿½ initialisation of the inventory
+                       2 ï¿½ initialisation of and copy of the theoretical stock or only a copy of the stock if the inventory already exists
+                       3 ï¿½ initialisation, copy of the theoretical stock and of the quantities in INVSAISIE or only copy of the quantities in INVSAISIE if the inventory already exists
+                       4 ï¿½ initialisation + copy ofthe theoretical stock + input of the quantities + validation of the input + update of the stock
+                       5 ï¿½ input of the quantities for an existing inventory
+                       6 ï¿½ modification of an existing inventory 9 ï¿½ deletion of an existing inventory
                   */
 
                 -- Insert the counter-counting as a Script 3rd Party counter counting

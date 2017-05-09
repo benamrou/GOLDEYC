@@ -10,6 +10,6 @@ prompt
 prompt Creating table ITEMMHLINK
 prompt =========================
 prompt
-@@itemmhlink.tab
+@@sql/itemmhlink.table.creation.sql
 
 spool off
