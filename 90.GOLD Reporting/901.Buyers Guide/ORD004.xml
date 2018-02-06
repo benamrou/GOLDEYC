@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<ROOT>
+  <TXT>select brand,
+       vendor,
+       vendor_desc,
+       categorie,
+       item_code,
+       LV,
+       item_desc_fr,
+       item_desc_gb,
+       item_desc_fl,
+       upc_code,
+       logistic_code,
+       tu_code,
+       ref_order,
+       pu,
+       (SELECT ROUND((NVL(order_week_1, 0) + NVL(order_week_2, 0) +
+                     NVL(order_week_3, 0) + NVL(order_week_4, 0)) / 4)
+          FROM dual) AVERAGE_LAST_4_WEEKS,
+       order_week_1,
+       order_week_2,
+       order_week_3,
+       order_week_4,
+       ORDER_ytd
+  from (select brand,
+               vendor,
+               vendor_desc,
+               categorie,
+               item_code,
+               LV,
+               item_desc_fr,
+               item_desc_gb,
+               item_desc_fl,
+               upc_code,
+               logistic_code,
+               tu_code,
+               ref_order,
+               pu,
+               sum(order_week_1) order_week_1,
+               sum(order_week_2) order_week_2,
+               sum(order_week_3) order_week_3,
+               sum(order_week_4) order_week_4,
+               sum(ORDER_ytd) ORDER_ytd
+          from (select foucnuf vendor,
+                       foulibl vendor_desc,
+                       aracexr item_code,
+                       aracfin internal_vendor,
+                       pkparpostes.get_postlibl(1, 10, 731, arutypul, 'GB') pu,
+                       aracean ref_order,
+                       aracexvl lv,
+                       (SELECT tattlibl
+                          FROM artattri, tra_attrival
+                         WHERE aatccla = 'BRAND'
+                           AND aatccla = tattccla
+                           AND aatcatt = tattcode
+                           AND langue = 'FR'
+                           AND aatcinr = aracinr 
+                           AND TRUNC(SYSDATE) BETWEEN aatddeb AND aatdfin) brand,
+                       pkstrucobj.get_desc(1,
+                                           pkstrucrel.GET_CINT_PERE(1,
+                                                                    '1',
+                                                                    aracinr,
+                                                                    CURRENT_DATE),
+                                           'GB') categorie,
+                       aracexr itemcode,
+                       pkartvl.get_vldesc(1, araseqvl, 'FR') item_desc_fr,
+                       pkartvl.get_vldesc(1, araseqvl, 'GB') item_desc_gb,
+                       pkartvl.get_vldesc(1, araseqvl, 'NL') item_desc_fl,
+                       pkartcoca.get_code_caisse(1,
+                                                 cinl_sku,
+                                                 trunc(CURRENT_DATE)) upc_code,
+                       (SELECT acucode
+                          FROM artcoul , artulul
+                         WHERE acucinl = allcinlf
+                           and araseqvl = allseqvlp
+                           AND TRUNC(SYSDATE) BETWEEN acuddeb AND acudfin
+                           and length(acucode) = 6
+                           AND ROWNUM = 1) logistic_code,
+                       (SELECT v.code
+                          FROM v_tmc_gtin  v
+                         WHERE v.seqvl = araseqvl
+                           and v.cinr = aracinr
+                           and v.cinl = aracinl
+                           AND ROWNUM = 1) tu_code,                              
+                       round(nvl((select sum(SMSPUIU)
+                                   from stomvsemaine, sitdgene
+                                  where smssite = socsite
+                                    and smscinl = cinl_sku
+                                    and soccmag = 10
+                                    and smssemaine =
+                                        to_char(CURRENT_DATE - 7 * 1,
+                                                'IYYYIW')),
+                                 0) / coef_pck,
+                             0) order_week_1,
+                       round(nvl((select sum(SMSPUIU)
+                                   from stomvsemaine, sitdgene
+                                  where smssite = socsite
+                                    and smscinl = cinl_sku
+                                    and soccmag = 10
+                                    and smssemaine =
+                                        to_char(CURRENT_DATE - 7 * 2,
+                                                'IYYYIW')),
+                                 0) / coef_pck,
+                             0) order_week_2,
+                       round(nvl((select sum(SMSPUIU)
+                                   from stomvsemaine, sitdgene
+                                  where smssite = socsite
+                                    and smscinl = cinl_sku
+                                    and soccmag = 10
+                                    and smssemaine =
+                                        to_char(CURRENT_DATE - 7 * 3,
+                                                'IYYYIW')),
+                                 0) / coef_pck,
+                             0) order_week_3,
+                       round(nvl((select sum(SMSPUIU)
+                                   from stomvsemaine, sitdgene
+                                  where smssite = socsite
+                                    and smscinl = cinl_sku
+                                    and soccmag = 10
+                                    and smssemaine =
+                                        to_char(CURRENT_DATE - 7 * 4,
+                                                'IYYYIW')),
+                                 0) / coef_pck,
+                             0) order_week_4,
+                       round(nvl((select sum(smmPUIU)
+                                   from stomvmois, sitdgene
+                                  where smmmois between
+                                        to_char(CURRENT_DATE, 'YYYY') || '01' and
+                                        to_char(CURRENT_DATE, 'YYYYMM')
+                                    and smmsite = socsite
+                                    and soccmag = 10
+                                    and smmcinl = cinl_sku),
+                                 0) / coef_pck,
+                             0) ORDER_YTD
+                  from (select distinct aracfin,
+                                        aracexr,
+                                        aracexvl,
+                                        aracinr,
+                                        aracean,
+                                        araseqvl,
+                                        ararefc,
+                                        aracinl,
+                                        arutypul,
+                                        foucnuf,
+                                        foulibl,
+                                        pkartstock.RecupCinlUVC(1, aracinl) cinl_sku,
+                                        pkartstock.ConvertirQteUl_VL(1,
+                                                                     1,
+                                                                     pkartstock.RecupereCinlDest(1,
+                                                                                                 araseqvl,
+                                                                                                 41),
+                                                                     araseqvl,
+                                                                     1) coef_pck
+                          from artuc c, artul l, foudgene f
+                         WHERE arucinl = aracinl
+                           and c.aracinr = l.arucinr
+                           and c.araseqvl = l.aruseqvl
+                           and aratfou = 1
+                           and aracdble = 1
+                           and f.foucfin = aracfin
+                           and (foucnuf = ':PARAM_VENDOR:' or ':PARAM_VENDOR:' = '-1')
+                           and trunc(sysdate) between araddeb and aradfin))
+              WHERE tu_code IS NOT NULL
+                and upc_code is not null
+         group by brand,
+                  vendor,
+                  vendor_desc,
+                  categorie,
+                  item_code,
+                  lv,
+                  item_desc_fr,
+                  item_desc_gb,
+                  item_desc_fl,
+                  upc_code,
+                  logistic_code,
+                  tu_code,
+                  ref_order,
+                  pu)
+ order by 1, 2, 4
+
+  </TXT>
+  <COL>Brand</COL>
+  <COL>Vendor</COL>
+  <COL>Vendor Desc</COL>
+  <COL>Category</COL>
+  <COL>Item Code</COL>
+  <COL>LV</COL>
+  <COL>Item Desc FR</COL>
+  <COL>Item Desc GB</COL>
+  <COL>Item Desc FL</COL>
+  <COL>Item UPC</COL>
+  <COL>Item Logistic</COL>
+  <COL>Trade Unit</COL>
+  <COL>Reference</COL>
+  <COL>Purchase Unit</COL>
+  <COL>Average (last 4 weeks)</COL>
+  <COL>Order week 1</COL>
+  <COL>Order week 2</COL>
+  <COL>Order week 3</COL>
+  <COL>Order week 4</COL>
+  <COL>Orders YTD</COL>
+   <VAR>
+        <NAME>:PARAM_VENDOR:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Vendor code (-1 for all)</PROMPT>
+  </VAR>
+</ROOT>

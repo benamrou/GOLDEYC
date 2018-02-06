@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+ 
+<ROOT> 
+  <TXT>
+/*begin add*/
+/*begin add*/
+WITH orderID as 
+(SELECT ECDCEXCDE
+            FROM CDEENTCDE, FOUDGENE
+           WHERE TRUNC(ECDDLIV) = TO_DATE(':DTE:', 'DD/MM/YY')
+             AND ECDCFIN = FOUCFIN),
+/*end add*/
+DETAIL
+  AS (SELECT /*+ materialize */
+       FOUCNUF,
+       FOULIBL,
+       COMM_ORD,
+       HOPE_ORD,
+       COMM_ORD_DESC,
+      PKSTOCK.GETSTOCKDISPOENQTEUVC_VL(1, 9000, PKARTSTOCK.RECUPCINLUVC(1, CINL_ORD), SEQVL_ORD) WHS_INV,
+       SUM(ROUND(COMM_ORD_QTY, 5)) QTY_ORD,
+       COMM_PREP,
+       COMM_PREP_DESC,
+       SUM(ROUND(COMM_PREP_QTY, 5)) QTY_PREP,
+       SUM(ROUND(COMM_SHIP_QTY, 5)) QTY_SHIP,
+       DECODE(NVL(LIST_TYPE, 1), 1, ' ', 2, 'PROMO', ' ') PRM,
+       TO_CHAR(NEXT_DELIV_DATE, 'DD/MM/YY') DELIV,
+       SUM(ROUND(COMM_DELIV_QTY, 5)) QTY_DELIV
+       /*begin add*/
+       from (SELECT /*+ materialize */
+       FOUCNUF,
+       FOULIBL,
+       COMM_ORD,
+       HOPE_ORD,
+       COMM_ORD_DESC,
+       COMM_ORD_QTY,
+       COMM_PREP,
+       COMM_PREP_DESC,
+       COMM_PREP_QTY,
+       COMM_SHIP_QTY,
+       COMM_DELIV_QTY,
+       LIST_TYPE,
+       NEXT_DELIV_DATE,
+       SEQVL_ORD,
+       CINL_ORD,
+       rank() over(partition by aracexr order by araddeb desc) rk
+   /*end add*/                 
+FROM (SELECT PKARTRAC.GET_ARTCEXR(1, CCLCINRC) COMM_ORD,
+           PKSTRUCOBJ.GET_DESC(1, CCLCINRC, 'FR') COMM_ORD_DESC,
+           SUM(CCLQTEC / DECODE(CCLUVUP, 0, 1, CCLUVUP)) COMM_ORD_QTY,
+           PKARTRAC.GET_ARTCEXR(1, CCLCINRP) COMM_PREP,
+           pkartcoul.get_code_logistique(1, cclcinlc, to_char(trunc(sysdate), 'DD/MM/RR')) HOPE_ORD,
+           PKSTRUCOBJ.GET_DESC(1, CCLCINRP, 'FR') COMM_PREP_DESC,
+           SUM(NVL(CCLQTEP,0) / DECODE(CCLUVUP, 0, 1, CCLUVUP)) COMM_PREP_QTY,
+           SUM(NVL(CCLQTEUPX, 0)) COMM_SHIP_QTY,
+           CCLSEQVLC SEQVL_ORD ,
+           CCLCINLC CINL_ORD,
+           SUM(NVL(sdrqtea,0) / DECODE(sdruauvc, 0, 1, sdruauvc)) COMM_DELIV_QTY
+        FROM CCLDETCCL, stodetre
+        ,orderID /*add*/
+       WHERE 
+       /*begin remove*/
+       /*CCLCEXCDE IN
+           (SELECT ECDCEXCDE
+            FROM CDEENTCDE, FOUDGENE
+           WHERE TRUNC(ECDDLIV) = TO_DATE(':DTE:', 'DD/MM/YY')
+             AND ECDCFIN = FOUCFIN
+             AND FOUCNUF NOT LIKE 'CD%')*/
+             /*end remove*/
+         cclcexcde = ecdcexcde/*add*/
+         AND CCLSITE = '9000' -- here my lord
+         AND CCLTCDE=1 /* On Stock */
+         AND CCLSTATUS >= 3 /* Exclude Display Orders*/
+         AND TRUNC(CCLDCDE) + 5 > TRUNC(CCLDLIVD)
+         AND sdrcincde = cclcincde
+         and cclcinlc = sdrcinla
+       GROUP BY PKARTRAC.GET_ARTCEXR(1, CCLCINRC),
+            PKSTRUCOBJ.GET_DESC(1, CCLCINRC, 'FR'),
+            pkartcoul.get_code_logistique(1, cclcinlc, to_char(trunc(sysdate), 'DD/MM/RR')),
+            PKARTRAC.GET_ARTCEXR(1, CCLCINRP),
+            PKSTRUCOBJ.GET_DESC(1, CCLCINRP, 'FR'),
+            CCLSEQVLC ,CCLCINLC,CCLSITE
+      UNION ALL
+      SELECT PKARTRAC.GET_ARTCEXR(1, CCLCINRC) COMM_ORD,
+           PKSTRUCOBJ.GET_DESC(1, CCLCINRC, 'FR') COMM_ORD_DESC,
+           SUM(CCLQTEC / DECODE(CCLUVUP, 0, 1, CCLUVUP)) COMM_ORD_QTY,
+           PKARTRAC.GET_ARTCEXR(1, CCLCINRP) COMM_PREP,
+           pkartcoul.get_code_logistique(1, cclcinlc, to_char(trunc(sysdate), 'DD/MM/RR')) HOPE_ORD,
+           PKSTRUCOBJ.GET_DESC(1, CCLCINRP, 'FR') COMM_PREP_DESC,
+           SUM(NVL(CCLQTEP,0) / DECODE(CCLUVUP, 0, 1, CCLUVUP)) COMM_PREP_QTY,
+           SUM(CCLQTEUPX) COMM_SHIP_QTY,
+           CCLSEQVLC SEQVL_ORD ,
+           CCLCINLC CINL_ORD ,
+           SUM(NVL(sdrqtea,0) / DECODE(sdruauvc, 0, 1, sdruauvc)) COMM_DELIV_QTY
+        FROM HCCLDETCCL, stodetre
+        ,orderID /*add*/
+       WHERE /*beginn removee*//*CCLCEXCDE IN
+           (SELECT ECDCEXCDE
+            FROM CDEENTCDE, FOUDGENE
+           WHERE TRUNC(ECDDLIV) = TO_DATE(':DTE:', 'DD/MM/YY') -- here my lord 050317 5/3/2017 11:00:00 PM
+             AND ECDCFIN = FOUCFIN
+             AND FOUCNUF NOT LIKE 'CD%')*//*end remove*/
+         cclcexcde = ecdcexcde/*add*/
+         AND CCLSITE = '9000'
+         AND CCLTCDE=1 /* On Stock */
+         AND CCLSTATUS >= 3   /*Exclude Display Orders*/
+        AND TRUNC(CCLDCDE) + 5 > TRUNC(CCLDLIVD)
+         and sdrcincde = cclcincde
+         and cclcinlc = sdrcinla
+       GROUP BY PKARTRAC.GET_ARTCEXR(1, CCLCINRC),
+            PKSTRUCOBJ.GET_DESC(1, CCLCINRC, 'FR'),
+            pkartcoul.get_code_logistique(1, cclcinlc, to_char(trunc(sysdate), 'DD/MM/RR')),
+            PKARTRAC.GET_ARTCEXR(1, CCLCINRP),
+            PKSTRUCOBJ.GET_DESC(1, CCLCINRP, 'FR'),
+            CCLSEQVLC ,CCLCINLC, CCLSITE), 
+       (SELECT ARVCEXR, MAX(AVISTAT) LIST_TYPE
+        FROM AVEPRIX, ARTUV
+       WHERE ARVCINV = AVICINV
+         AND TO_DATE(':DTE:', 'DD/MM/YY') BETWEEN AVIDDEB - 2 AND
+           AVIDFIN
+       GROUP BY ARVCEXR) PROMO,
+       (SELECT DCDCEXR, MIN(TRUNC(ECDDLIV)) NEXT_DELIV_DATE
+        FROM CDEENTCDE, CDEDETCDE
+       WHERE ECDCINCDE = DCDCINCDE
+         AND ECDETAT IN (5, 6)
+         AND DCDETAT IN (5, 6)
+         AND ECDSITE = '9000'
+        GROUP BY DCDCEXR) DELIV_DATE,
+        /*begin remove*/
+        /*(SELECT FOUCNUF, FOULIBL,FOUCFIN, UC.ARACEXR
+        FROM ARTUC UC,
+           FOUDGENE,
+           (SELECT ARACEXR, MAX(TRUNC(ARADDEB)) ORD_DDEB
+            FROM ARTUC, FOUDGENE
+           WHERE ARASITE = '9000'
+             AND ARACFIN = FOUCFIN
+             AND ARATFOU = 1 /* Handle the discontinued item, look for 60 days in the past/
+             AND ARADFIN > SYSDATE - 60
+           GROUP BY ARACEXR) TEMP
+           
+           
+       WHERE UC.ARASITE = '9000'
+         AND UC.ARACFIN = FOUCFIN
+         AND UC.ARATFOU = 1
+         AND UC.ARACEXR = TEMP.ARACEXR
+         AND UC.ARADDEB = ORD_DDEB
+         AND ARADFIN > SYSDATE - 60
+       GROUP BY FOUCNUF, FOUCFIN, UC.ARACEXR),*/
+       /*end remove*/
+       ARTUC,FOUDGENE
+   WHERE COMM_ORD = DCDCEXR(+)
+     AND COMM_PREP = DCDCEXR(+)
+     AND COMM_PREP = ARACEXR(+)
+     AND COMM_ORD = ARVCEXR(+) /* Sector Supply Management*/
+     AND ARASITE = '9000'
+     AND ARACFIN = FOUCFIN
+     AND ARATFOU = 1 /* Handle the discontinued item, look for 60 days in the past*/
+     AND ARADFIN > SYSDATE - 60
+     /*begin add*/
+     )
+    
+   where rk=1 /*end add*/
+   GROUP BY
+        FOUCNUF,
+        FOULIBL,
+        COMM_ORD,
+        HOPE_ORD,
+        COMM_ORD_DESC,
+        COMM_PREP,
+        COMM_PREP_DESC,
+        COMM_DELIV_QTY,
+        DECODE(NVL(LIST_TYPE, 1), 1, ' ', 2, 'PROMO', ' '),
+        NEXT_DELIV_DATE   ,
+        SEQVL_ORD,
+        CINL_ORD     
+  )
+  SELECT
+       FOUCNUF,
+       FOULIBL,
+       COMM_ORD,
+       HOPE_ORD,
+       COMM_ORD_DESC,
+       WHS_INV,
+       QTY_ORD,
+       QTY_PREP,
+       QTY_PREP - QTY_ORD,
+       QTY_ORD - QTY_DELIV,
+       QTY_DELIV,
+       PRM,
+       DELIV
+  FROM DETAIL
+  order by 1, 2
+
+  </TXT>
+  <COL>Supplier</COL>
+  <COL>Supplier desc.</COL>
+  <COL>Ord. Comm</COL>
+  <COL>Hope </COL>
+  <COL>Ord. Description</COL>
+  <COL>Whs Inventory</COL>
+  <COL>Ord. Qty</COL>
+  <COL>Prep. Qty</COL>
+  <COL>QTY_PREP - QTY_ORD</COL>
+  <COL>QTY_ORD - QTY_DELIV</COL>
+  <COL>Qty delivered</COL>
+  <COL>Promo</COL>
+  <COL>Next Delivery</COL>
+  <VAR>   
+  	<NAME>:DTE:</NAME> 
+    	<DEFAULT></DEFAULT> 
+    	<PROMPT>Date ramasse(DD/MM/YY)</PROMPT> 
+  </VAR> 
+</ROOT>

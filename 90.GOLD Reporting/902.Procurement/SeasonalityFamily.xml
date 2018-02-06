@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>
+SELECT WEEK, ITEM, SUB_CAT as SUBCATEGORY, sum(shipment) as QUANTITY FROM (   SELECT pkartrac.get_artcexr(1,pkartul.getCinr(1,stmcinl)) as ITEM,   pkstrucobj.get_cext(1,pkstrucrel.GET_CINT_PERE(1,1,pkartul.getCinr(1,stmcinl), trunc(sysdate))) as SUB_CAT,   to_char(stmdmvt, 'YYYYWW') as WEEK,   abs(stmval) as SHIPMENT   FROM stomvt   WHERE stmsite = :PARAM_SITE:   AND stmtmvt = 151   AND stmdmvt >= to_date(':PARAM_DDEB:','MM/DD/YY')   AND to_date(':PARAM_DFIN:','MM/DD/YY') >= stmdmvt   AND (pkstrucobj.get_cext(1,pkstrucrel.GET_CINT_PERE(1,1,pkartul.getCinr(1,stmcinl), trunc(sysdate)))= ':PARAM_FAM:' OR ':PARAM_FAM:' = '-1')) GROUP BY ITEM, WEEK, SUB_CAT
+  </TXT>
+  <COL>WEEK</COL>
+  <COL>ITEM</COL>
+  <COL>SUBCATEGORY</COL>
+  <COL>QUANTITY</COL> 
+  <VAR>
+        <NAME>:PARAM_SITE:</NAME>
+        <DEFAULT>91071</DEFAULT>
+        <PROMPT>Warehouse</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:PARAM_DDEB:</NAME>
+        <DEFAULT>10/25/09</DEFAULT>
+        <PROMPT>Start date (MM/DD/YY)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:PARAM_DFIN:</NAME>
+        <DEFAULT>10/25/12</DEFAULT>
+        <PROMPT>End date (MM/DD/YY)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:PARAM_FAM:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Subcategory (13 digit)</PROMPT>
+  </VAR>
+
+</ROOT>

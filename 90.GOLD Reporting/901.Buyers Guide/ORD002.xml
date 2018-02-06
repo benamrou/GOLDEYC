@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>
+      WITH C_ORDER AS (
+      SELECT ecdsite, soclmag, ecdcexcde, foucnuf, fccnum, foulibl, ecddcom, ecddliv, ecddenvoi,
+      ecdetat || ' - ' || pkparpostes.get_postlibc(1, 10, 502 , ecdetat, 'FR') status,
+      (SELECT SUM(dcdcoli) || ' PCK' FROM cdedetcde WHERE ecdcincde=dcdcincde ) nbpack,
+      (SELECT SUM(dcdprix*dcdqtec/dcduauvc*dcduaut) FROM cdedetcde WHERE ecdcincde=dcdcincde ) montantHT,
+      (SELECT trunc(SUM((dcdprix*dcdqtec/dcduauvc*dcduaut)/(1+tvataux/100)),2)
+      FROM cdedetcde, tvas WHERE ecdcincde=dcdcincde AND tvacode=dcdctva ) montant
+      FROM cdeentcde, sitdgene, foudgene, fouccom
+      WHERE socsite=ecdsite
+      AND foucfin=ecdcfin
+      AND fccccin= ecdccin
+      AND (TRUNC(to_date(':PARAM_DATE:','DD/MM/RR')) = TRUNC(ecddcom) or ':PARAM_DATE:'='-1')
+      AND (TRUNC(to_date(':PARAM_COLL_DATE:','DD/MM/RR')) = TRUNC(ecddenvoi) or ':PARAM_COLL_DATE:'='-1')
+      )
+      SELECT mag.socsite, mag.soclmag, (SELECT COUNT(1) FROM C_ORDER WHERE socsite=ecdsite),
+      ecdcexcde, foucnuf, fccnum, foulibl, ecddcom, ecddliv, ecddenvoi, status, nbpack, montantHT, montant
+      FROM sitdgene mag, C_ORDER
+      WHERE socsite between 30000 and 90000
+      AND mag.socsite = ecdsite (+)
+      ORDER BY socsite ASC
+  </TXT>
+  <COL>Store</COL>
+  <COL>Description</COL>
+  <COL>Nb. order</COL>
+  <COL>Order num.</COL>
+  <COL>Supplier</COL>
+  <COL>Comm. contract</COL>
+  <COL>Supplier desc.</COL>
+  <COL>Order date</COL>
+  <COL>Exp. delivery date</COL>
+  <COL>Collect day</COL>
+  <COL>Status</COL>
+  <COL>Nb. packaga</COL>
+  <COL>Total HT</COL>
+  <COL>Total</COL>
+  <VAR>
+      <NAME>:PARAM_DATE:</NAME>
+      <DEFAULT>-1</DEFAULT>
+      <PROMPT>Order date (DD/MM/YY)</PROMPT>
+  </VAR>
+  <VAR>
+      <NAME>:PARAM_COLL_DATE:</NAME>
+      <DEFAULT>01/01/17</DEFAULT>
+      <PROMPT>Collection date (DD/MM/YY)</PROMPT>
+  </VAR>
+</ROOT>

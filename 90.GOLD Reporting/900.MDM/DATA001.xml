@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>
+WITH VUE AS
+(select distinct artcexr code_externe_gold,
+                  (SELECT pkartcoul.get_code_logistique(1,arucinl, TRUNC(SYSDATE))
+									FROM artul
+									WHERE arucinr=artcinr
+									AND arutypul=41) code_hope,
+                  artcinr CINR,
+                  pkstrucobj.get_desc(0, artcinr, 'FR') as Libelle,
+                  pkparpostes.get_postlibl(0, 10, 955, artetat, 'FR') as Etat
+    from artrac
+		WHERE artcexr = ':CODE_ARTICLE:' OR '-1' = ':CODE_ARTICLE:'
+		OR EXISTS (SELECT 1 FROM artcoul WHERE acucode=':CODE_ARTICLE:' and acucinr=artcinr) )
+select distinct code_externe_gold,
+                code_hope,
+                Libelle,
+                Etat,
+                NVL((Erreur1 || Erreur2 || Erreur3 || Erreur4 || Erreur5 || Erreur6 || Erreur7 || Erreur8), 'Data integrity passed') Erreurs
+  from VUE,
+       (select 'Manque assortiment commandable     |     ' as Erreur1,
+               CINR as CINR1
+          from VUE
+         where not exists (select 1
+                 from artuc
+                 where aracinr = CINR
+                   and trunc(trunc(sysdate)) between araddeb and aradfin)),
+       (select 'Manque prix d achat     |     ' as Erreur2, CINR as CINR2
+          from VUE
+         where not exists (select 1
+                  from tarprix
+                 where tapcinr = CINR
+                   and trunc(sysdate) between tapddeb and tapdfin)),
+       (select 'Manque donnees logistique du carton      |     ' as Erreur3,
+               CINR as CINR3
+          from VUE
+         where not exists (select 1
+                  from artul
+                 where arucinr = CINR
+                   and arutypul = 41)
+         ),
+       (select 'Manque assortiment vendable     |     ' as Erreur4,
+               CINR as CINR4
+          from VUE
+         where not exists (select 1
+                  from artsite, artuv
+                 where arvcinr = CINR
+                   and sitcinv = arvcinv)),
+       (select 'Manque prix de vente     |     ' as Erreur5,
+               CINR as CINR5
+          from VUE
+         where not exists (select 1
+                  from aveprix, artuv, artrac
+                 where arvcinr = CINR
+                   and avicinv = arvcinv
+                   and arvcinr = artcinr
+                   and arttypp != 5
+                   and trunc(sysdate) between aviddeb and avidfin)),
+        (select 'Manque assortiment livrable     |     ' as Erreur6,
+               CINR as CINR6
+          from VUE
+         where not exists (select 1
+                  from artasent
+                 where alocinr = CINR
+                   and trunc(sysdate) between aloddeb and alodfin)),
+       (select 'Aucunne Taxe ou charge :     ' as Erreur7,
+               CINR as CINR7
+          from VUE
+         where not exists (select 1
+                  from tarexar
+                 where trxcinr = CINR
+                   and trunc(sysdate) between trxddeb and trxdfin)),
+       (select 'Manque prix cession     |     ' as Erreur8,
+               CINR as CINR8
+          from VUE
+         where not exists (select 1
+                  from wplig, artuc
+                 where wlgcinr = CINR
+                   and exists (select 1 from artuc where aracinr = wlgcinr and pkfoudgene.get_FouType(0, aracfin) = 3 and trunc(sysdate) between araddeb and aradfin)
+                   and trunc(sysdate) between wlgddeb and wlgdfin))
+where CINR = CINR1(+)
+   and CINR = CINR2(+)
+   and CINR = CINR3(+)
+   and CINR = CINR4(+)
+   and CINR = CINR5(+)
+   and CINR = CINR6(+)
+   and CINR = CINR7(+)
+   and CINR = CINR8(+)
+order by 1
+
+  </TXT>
+  <COL>Item code</COL>
+  <COL>Hope code</COL>
+  <COL>Description</COL>
+  <COL>Status</COL>
+  <COL>Data integrity result</COL> 
+  <VAR>
+        <NAME>:CODE_ARTICLE:</NAME>
+        <DEFAULT></DEFAULT>
+        <PROMPT>Code article/Hope (-1 for all)</PROMPT>
+  </VAR>
+</ROOT>

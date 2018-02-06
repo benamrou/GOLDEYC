@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>
+select l.lissite WH, f.foucnuf VENDOR, l.lisnfilf ADDRESSCHAIN, i.ffilibl VENDORDESC, (select saplibl from liensecappro, secappro where liacfin=l.liscfin and liaccin=l.lisccin and liasite=l.lissite and sapcinap=liacinap and saptype=1 and rownum=1) BUYERNAME, (select tattlibl from fouattri, tra_attrival where fatcfin=l.liscfin and trunc(sysdate) between fatddeb and fatdfin and fatcla='AR-P' and tattccla=fatcla and tattcode=fatatt and langue='HN' and rownum=1) PROMO, (select tattlibl from fouattri, tra_attrival where fatcfin=l.liscfin and trunc(sysdate) between fatddeb and fatdfin and fatcla='AR-D' and tattccla=fatcla and tattcode=fatatt and langue='HN' and rownum=1) DAMAGE, lpad(l.lisreap,2)||' '||pkparpostes.get_postlibl(1,0,1396,l.lisureap,'HN') FREQUENCY, initcap(tmp.orddate) ORDERDATE, tmp.picktime COLLECTIONTIME, tmp.leadtime LEADTIME, rtrim(ltrim(initcap(tmp.dlvdate))) DELIVERYDATE from (select lissite, liscfin, lisccin, liscsin, lisnfilf, lisddeb, 'MONDAY' orddate, to_char(to_date(lishrlu,'HH24MI'),'HH12:MI AM') picktime, lislilu leadtime, to_char(to_date('01/04/10','MM/DD/RR')+lislilu,'DAY') dlvdate from lienserv where lissite=:SITE: and trunc(sysdate) between lisddeb and lisdfin and liscdlu=1 union all select lissite, liscfin, lisccin, liscsin, lisnfilf, lisddeb, 'TUESDAY' orddate, to_char(to_date(lishrma,'HH24MI'),'HH12:MI AM') picktime, lislima leadtime, to_char(to_date('01/05/10','MM/DD/RR')+lislima,'DAY') dlvdate from lienserv where lissite=:SITE: and trunc(sysdate) between lisddeb and lisdfin and liscdma=1 union all select lissite, liscfin, lisccin, liscsin, lisnfilf, lisddeb, 'WEDNESDAY' orddate, to_char(to_date(lishrme,'HH24MI'),'HH12:MI AM') picktime, lislime leadtime, to_char(to_date('01/06/10','MM/DD/RR')+lislime,'DAY') dlvdate from lienserv where lissite=:SITE: and trunc(sysdate) between lisddeb and lisdfin and liscdme=1 union all select lissite, liscfin, lisccin, liscsin, lisnfilf, lisddeb, 'THURSDAY' orddate, to_char(to_date(lishrje,'HH24MI'),'HH12:MI AM') picktime, lislije leadtime, to_char(to_date('01/07/10','MM/DD/RR')+lislije,'DAY') dlvdate from lienserv where lissite=:SITE: and trunc(sysdate) between lisddeb and lisdfin and liscdje=1 union all select lissite, liscfin, lisccin, liscsin, lisnfilf, lisddeb, 'FRIDAY' orddate, to_char(to_date(lishrve,'HH24MI'),'HH12:MI AM') picktime, lislive leadtime, to_char(to_date('01/08/10','MM/DD/RR')+lislive,'DAY') dlvdate from lienserv where lissite=:SITE: and trunc(sysdate) between lisddeb and lisdfin and liscdve=1 union all select lissite, liscfin, lisccin, liscsin, lisnfilf, lisddeb, 'SATURDAY' orddate, to_char(to_date(lishrsa,'HH24MI'),'HH12:MI AM') picktime, lislisa leadtime, to_char(to_date('01/09/10','MM/DD/RR')+lislisa,'DAY') dlvdate from lienserv where lissite=:SITE: and trunc(sysdate) between lisddeb and lisdfin and liscdsa=1 union all select lissite, liscfin, lisccin, liscsin, lisnfilf, lisddeb, 'SUNDAY' orddate, to_char(to_date(lishrdi,'HH24MI'),'HH12:MI AM') picktime, lislidi leadtime, to_char(to_date('01/10/10','MM/DD/RR')+lislidi,'DAY') dlvdate from lienserv where lissite=:SITE: and trunc(sysdate) between lisddeb and lisdfin and liscddi=1) tmp,       lienserv l, foudgene f, foufilie i where l.lissite=tmp.lissite and l.liscfin=tmp.liscfin and l.lisccin=tmp.lisccin and l.liscsin=tmp.liscsin and l.lisnfilf=tmp.lisnfilf and l.lisddeb=tmp.lisddeb and f.foucfin=l.liscfin and i.fficfin=l.liscfin and i.ffinfilf=l.lisnfilf order by 1, 2, 3, decode(tmp.orddate,'MONDAY',1,'TUESDAY',2,'WEDNESDAY',3,'THURSDAY',4,'FRIDAY',5,'SATURDAY',6,'SUNDAY',7)
+  </TXT>
+  <COL>Warehouse</COL>
+  <COL>Vendor</COL>
+  <COL>Address chain</COL> 
+  <COL>Description</COL> 
+  <COL>Buyer name</COL> 
+  <COL>Promo policy</COL>
+  <COL>Damage policy</COL>
+  <COL>Frequency</COL>
+  <COL>Order day</COL>
+  <COL>Collection time</COL>
+  <COL>Lead time</COL>
+  <COL>Delivery day</COL> 
+  <VAR>
+        <NAME>:SITE:</NAME>
+        <DEFAULT>91070</DEFAULT>
+        <PROMPT>Warehouse</PROMPT>
+  </VAR>
+</ROOT>

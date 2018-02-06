@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<ROOT>
+  <TXT>select DECODE(':PARAM_MOIS:',-1,'ALL',':PARAM_MOIS:') MOIS, VENDOR, VENDOR_DESC, STORE, CEXR, LV, HOPE, item_desc_fr, item_desc_gb, item_desc_fl, SUM(QTY)
+from
+(select f.foucnuf VENDOR,
+       f.foulibl VENDOR_DESC,
+       s.smmsite STORE,
+       --a.aruseqvl SEQVL,
+       --pkartul.getCinr(1,smmcinl) CINR, 
+       pkartrac.Get_Artcexr(1, pkartul.getCinr(1, smmcinl)) CEXR,
+       pkartvl.Get_Arlcexvl(1, a.aruseqvl) LV,
+       (SELECT acucode
+          FROM artcoul, artulul
+         WHERE acucinl = allcinlf
+           and a.aruseqvl = allseqvlp
+           AND TRUNC(SYSDATE) BETWEEN acuddeb AND acudfin
+           and ACUTCOD = 5
+           AND length(acucode) = 6
+           AND ROWNUM = 1) HOPE,
+       pkartvl.get_vldesc(1, a.aruseqvl, 'FR') item_desc_fr,
+       pkartvl.get_vldesc(1, a.aruseqvl, 'GB') item_desc_gb,
+       pkartvl.get_vldesc(1, a.aruseqvl, 'FL') item_desc_fl,
+       s.smmPUIU QTY
+  from stomvmois s, artul a, artuc c, foudgene f, sitdgene e
+ where 1 = 1
+   and s.smmsite = e.socsite
+   and e.soccmag = 10
+   and (s.smmsite = :PARAM_SITE: OR :PARAM_SITE: = -1)
+   and a.arucinl = s.smmcinl
+   and a.arucinr = pkartul.getCinr(1, smmcinl)
+   and c.aracinr = a.arucinr
+   and c.araseqvl = a.aruseqvl
+   and trunc(sysdate) between c.araddeb and c.aradfin
+   and c.aratfou = 1
+   and c.arasite = 9000
+   and f.foucfin = c.aracfin
+   and (s.smmmois = ':PARAM_MOIS:' OR ':PARAM_MOIS:' = -1)
+   and (foucnuf = ':PARAM_VENDOR:' or ':PARAM_VENDOR:' = '-1')
+   and s.smmPUIU > 0
+    )
+group by VENDOR, VENDOR_DESC, STORE, CEXR, LV, HOPE, item_desc_fr, item_desc_gb, item_desc_fl
+
+  </TXT>
+  <COL>Mois</COL>        
+  <COL>Vendor</COL>
+  <COL>Vendor Desc</COL>
+  <COL>Store</COL>
+  <COL>Item Code</COL>
+  <COL>LV</COL>
+  <COL>Item Logistic</COL>
+  <COL>Item Desc FR</COL>
+  <COL>Item Desc GB</COL>
+  <COL>Item Desc FL</COL>
+  <COL>Order Qty</COL>
+   <VAR>
+        <NAME>:PARAM_VENDOR:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Vendor code (-1 for all)</PROMPT>
+  </VAR>
+    <VAR>
+        <NAME>:PARAM_SITE:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>STORE (-1 for all)</PROMPT>
+</VAR>
+    <VAR>
+        <NAME>:PARAM_MOIS:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>MOIS (-1 for all, 'YYYYMM')</PROMPT>
+</VAR>
+</ROOT>

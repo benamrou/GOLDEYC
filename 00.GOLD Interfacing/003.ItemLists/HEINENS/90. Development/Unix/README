@@ -1,0 +1,15 @@
+This folder DUNNHUMBY has been developped by B&B SYMPHONY LLC for HEINEN'S with EYC Collaboration. Key players in the realization and development of 
+the DUNNHUMBY PRICE GROUP Integration are:
+   - Rick F. (HEINEN'S)
+   - Greg S. (HEINEN'S)
+   - John K. (HEINEN'S)
+   - Amii L. (HEINEN'S)
+   - Ahmed B. (B&B)
+
+Developped on Jan. 2018.
+
+Key functionalities:
+   - Load the DUNNHUMBY from directory $GAIA/RECEIVED in specific HNCUSTOM table
+   - Run the mapping to integrate the dunnhumby
+   - Integrate the item list for dunnhumby
+

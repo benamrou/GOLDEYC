@@ -1,0 +1,72 @@
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Tue Jan 16 10:34:29 2018
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   .ctl
+
+There are 6 data files:
+Data File:      /home/hnpcen/gaia/RECEIVED/DUNNHUMBY_Promo.dat
+  Bad File:     logs/.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+Data File:      Group.dat
+  Bad File:     logs/.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+Data File:      and.dat
+  Bad File:     logs/.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+Data File:      Brand.dat
+  Bad File:     logs/.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+Data File:      Mapping.dat
+  Bad File:     logs/.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+Data File:      01032018.csv
+  Bad File:     logs/.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 1
+Errors allowed: 100000
+Continuation:    none specified
+Path used:      Direct
+
+Table DUNN_PRICEGROUP, loaded from every logical record.
+Insert option in effect for this table: APPEND
+TRAILING NULLCOLS option in effect
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+DNNDEPT                             FIRST     *   ,       CHARACTER            
+DNNSSDEPT                            NEXT     *   ,       CHARACTER            
+DNNCAT                               NEXT     *   ,       CHARACTER            
+DNNSSCAT                             NEXT     *   ,       CHARACTER            
+DNNCODE                              NEXT     *   ,       CHARACTER            
+DNNUPC                               NEXT     *   ,       CHARACTER            
+DNNLV                                NEXT     *   ,       CHARACTER            
+DNNDESC                              NEXT     *   ,       CHARACTER            
+DNNBRAND                             NEXT     *   ,       CHARACTER            
+DNNPGRP                              NEXT     *   ,       CHARACTER            
+DNNFILE                                                   CONSTANT
+    Value is ''
+DNNLGFI                                                   RECNUM
+DNNDCRE                                                   SYSDATE
+DNNDMAJ                                                   SYSDATE
+DNNUTIL                                                   CONSTANT
+    Value is 'DNNHUMBY'
+
+SQL*Loader-951: Error calling once/load initialization
+ORA-01009: missing mandatory parameter
+

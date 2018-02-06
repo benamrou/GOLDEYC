@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>
+select foucnuf as Vendor, arasite as Warehouse, artcexr as Item, aracexvl as LV, PKSTRUCOBJ.get_desc(1,aruclibl, 'HN') as Description, aramua as PU_Multiple, aramincde as Order_Min_PU from artuc, artul, artrac, foudgene, fouccom where arucinl = aracinl and aracfin = foucfin and araccin = fccccin and artcinr = arucinr and (arasite = :PARAM_SITE: or :PARAM_SITE: = -1) and (aracfin = pkfoudgene.get_cfin(1,':PARAM_VENDOR:') or ':PARAM_VENDOR:' = '-1') and sysdate between araddeb and aradfin order by foucnuf, artcexr 
+  </TXT>
+  <COL>Vendor</COL>
+  <COL>Warehouse</COL>
+  <COL>Item</COL> 
+  <COL>LV</COL>
+  <COL>Description</COL>
+  <COL>PU_multiple</COL>
+  <COL>Order_Min_PU</COL> 
+  <VAR>
+        <NAME>:PARAM_SITE:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Warehouse (-1 for all)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:PARAM_VENDOR:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Vendor (-1 for all)</PROMPT>
+  </VAR>
+</ROOT>

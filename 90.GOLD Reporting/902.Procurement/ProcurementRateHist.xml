@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>
+select foucnuf, COMM_ORD, COMM_ORD_DESC, sum(COMM_ORD_QTY), COMM_PREP, COMM_PREP_DESC, sum(COMM_PREP_QTY), sum(COMM_SHIP_QTY) from (       select pkartrac.get_artcexr(1,cclcinrc) COMM_ORD,              pkstrucobj.get_desc(1,cclcinrc,'HN') COMM_ORD_DESC,              sum(cclqtec / DECODE(ccluvup,0,1,ccluvup)) COMM_ORD_QTY,              pkartrac.get_artcexr(1,cclcinrp) COMM_PREP,              pkstrucobj.get_desc(1,cclcinrp,'HN') COMM_PREP_DESC,              sum(cclqtep / DECODE(ccluvup,0,1,ccluvup)) COMM_PREP_QTY,              sum(nvl(cclqteupx,0)) COMM_SHIP_QTY,              cclseqvlc SEQVL_ORD         from ccldetccl        where cclcexcde in (select ecdcexcde                              from cdeentcde, foudgene                             where trunc(ecddenvoi) between to_date(':DTE1:','MM/DD/YY') and to_date(':DTE2:','MM/DD/YY')                               and ecdcfin = foucfin                               and foucnuf not like 'CD%')          and cclsite = ':SITE:'          and cclstatus >= 5        group by pkartrac.get_artcexr(1,cclcinrc),                 pkstrucobj.get_desc(1,cclcinrc,'HN'),                 pkartrac.get_artcexr(1,cclcinrp),                 pkstrucobj.get_desc(1,cclcinrp,'HN'),                 cclseqvlc  union all       select pkartrac.get_artcexr(1,cclcinrc) COMM_ORD,              pkstrucobj.get_desc(1,cclcinrc,'HN') COMM_ORD_DESC,              sum(cclqtec / DECODE(ccluvup,0,1,ccluvup)) COMM_ORD_QTY,              pkartrac.get_artcexr(1,cclcinrp) COMM_PREP,              pkstrucobj.get_desc(1,cclcinrp,'HN') COMM_PREP_DESC,              sum(cclqtep / DECODE(ccluvup,0,1,ccluvup)) COMM_PREP_QTY,              sum(cclqteupx) COMM_SHIP_QTY,              cclseqvlc SEQVL_ORD         from hccldetccl        where cclcexcde in (select ecdcexcde                              from cdeentcde, foudgene                             where trunc(ecddenvoi) between to_date(':DTE1:','MM/DD/YY') and to_date(':DTE2:','MM/DD/YY')                               and ecdcfin = foucfin                               and foucnuf not like 'CD%')          and cclsite = ':SITE:'          and cclstatus >= 5        group by pkartrac.get_artcexr(1,cclcinrc),                 pkstrucobj.get_desc(1,cclcinrc,'HN'),                 pkartrac.get_artcexr(1,cclcinrp),                 pkstrucobj.get_desc(1,cclcinrp,'HN'),                 cclseqvlc),      artuc, foudgene where COMM_ORD = aracexr   and SEQVL_ORD = araseqvl   and arasite = ':SITE:'   and aracfin = foucfin   and aratfou = 1   and to_date(':DTE2:','MM/DD/YY') between araddeb and aradfin group by foucnuf, COMM_ORD, COMM_ORD_DESC, COMM_PREP, COMM_PREP_DESC        order by 1, 2
+  </TXT>
+  <COL>Supplier</COL>
+  <COL>Ord. Comm</COL> 
+  <COL>Ord. Description</COL> 
+  <COL>Ord. Qty</COL>
+  <COL>Prep. Comm</COL>
+  <COL>Prep. Desc</COL> 
+  <COL>Prep. Qty</COL>
+  <COL>Ship Qty</COL>
+  <VAR>   
+  	<NAME>:DTE1:</NAME> 
+    	<DEFAULT></DEFAULT> 
+    	<PROMPT>Start Date (MM/DD/YY)</PROMPT> 
+  </VAR> 
+  <VAR>   
+  	<NAME>:DTE2:</NAME> 
+    	<DEFAULT></DEFAULT> 
+    	<PROMPT>End Date (MM/DD/YY)</PROMPT> 
+  </VAR>
+  <VAR>
+        <NAME>:SITE:</NAME>
+        <DEFAULT></DEFAULT>
+        <PROMPT>Warehouse</PROMPT>
+  </VAR>
+</ROOT>

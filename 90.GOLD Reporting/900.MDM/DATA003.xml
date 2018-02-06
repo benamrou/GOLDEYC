@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+<ROOT> 
+  <TXT>
+			WITH 
+           C_VALUES AS (SELECT decode(':DATEREF:', 'CURRENT_DATE', trunc(CURRENT_DATE), TO_DATE(':DATEREF:','DD/MM/RR')) DTRT, :MAGBE: SITE_BE, :MAGLU: SITE_LU, :MAGFR: SITE_FR, 1000 PERE_BE, 1001 PERE_LU, 1010 PERE_FR FROM dual),
+           C_GOLDART AS ( SELECT SITE, PERE, arlcinr CINR, arlseqvl SEQVL, arlcexr CEXR, arlcexvl CEXVL, /*HOPE, CLEART_ARTCOUL_WIN, */pkparpostes.get_postlibl(1,0,1030, arttypp, 'GB') TYPP,
+                                pkstrucobj.get_cext(1, pkstrucrel.GET_CINT_PERE(1, '1', arlcinr,DTRT)) STRUC, pkstrucobj.get_desc(1, pkstrucrel.GET_CINT_PERE(1,'1',arlcinr,DTRT), 'FR') STRUCDESC
+                            FROM /*v_tmc_codeart,*/ artvl, artrac, (SELECT SITE_BE SITE, PERE_BE PERE FROM C_VALUES UNION
+                                                                SELECT SITE_LU SITE, PERE_LU PERE FROM C_VALUES UNION
+                                                                SELECT SITE_FR SITE, PERE_FR PERE FROM C_VALUES), C_VALUES
+                           WHERE arlcexr like ':RACINE:%'
+                             AND to_char(arlcexvl) like '%:VL:%'
+                             --AND NVL(CLEART_ARTCOUL_WIN, 'S') like ':CLEART:%'
+                             --AND NVL(HOPE, '-1') like ':HOPE:%'
+                             AND to_char(arttypp) like ':TYPP:%' 
+                             AND artcinr = arlcinr
+                             AND EXISTS (SELECT 1 FROM artuc, foudgene, C_VALUES 
+                                          WHERE aracinr = arlcinr
+                                            AND araseqvl = arlseqvl 
+                                            AND aracfin = foucfin 
+                                            AND foutype = 1 
+                                            AND DTRT BETWEEN araddeb AND aradfin
+                                            AND (foucnuf like ':CNUF:%' AND foulibl like ':LIBFOURN:%'))
+                             AND ':ACTIF:' = 'OUI'
+                    UNION ALL
+                          SELECT SITE, PERE, arlcinr CINR, arlseqvl SEQVL, arlcexr CEXR, arlcexvl CEXVL, /*HOPE, CLEART_ARTCOUL_WIN, */ pkparpostes.get_postlibl(1,0,1030, arttypp, 'GB') TYPP,
+                                 pkstrucobj.get_cext(1, pkstrucrel.GET_CINT_PERE(1, '1', arlcinr,DTRT)) STRUC, pkstrucobj.get_desc(1, pkstrucrel.GET_CINT_PERE(1,'1',arlcinr,DTRT), 'FR') STRUCDESC
+                            FROM /*v_tmc_codeart, */artvl, artrac, (SELECT SITE_BE SITE, PERE_BE PERE FROM C_VALUES UNION
+                                                                SELECT SITE_LU SITE, PERE_LU PERE FROM C_VALUES UNION
+                                                                SELECT SITE_FR SITE, PERE_FR PERE FROM C_VALUES), C_VALUES
+                           WHERE arlcexr like ':RACINE:%'
+                             AND to_char(arlcexvl) like '%:VL:%'
+                             --AND NVL(CLEART_ARTCOUL_WIN, 'S') like ':CLEART:%'
+                             --AND NVL(HOPE, '-1') like ':HOPE:%'
+                             AND artcinr = arlcinr
+                             AND to_char(arttypp) like ':TYPP:%' 
+                             AND ':ACTIF:' = 'NON'
+                             AND NOT EXISTS (SELECT 1 FROM artuc, foudgene
+                                            WHERE aracinr = arlcinr
+                                              AND araseqvl = arlseqvl
+                                              AND foucfin = aracfin
+                                              AND foutype = 1) 
+                              ),   
+           C_ASSMAG_GOLD AS -- Selection des assortiments magasins
+                            (SELECT SEQVL, SITE, PERE,
+                                    pkresobj.get_desc(1,respere,'GB') NOEUD_MAG, aracfin CFIN_MAG, araccin CCIN_MAG, aranfilf NFILF_MAG, foucnuf CNUF_MAG, foulibl CNUF_LIB_MAG, fccnum CCOM_MAG,
+                                    pkparpostes.get_postlibc(1, 10, 731, arutypul, 'FR') TYPUL_MAG
+                         FROM artuc, reseau, C_GOLDART, C_VALUES, foudgene, fouccom, artul
+                        WHERE aracexr = CEXR
+                          AND aracexvl = CEXVL
+                          ANd aracfin = foucfin
+                          AND araccin = fccccin
+                          ANd aracinl = arucinl
+                          AND arasite = SITE 
+                          AND respere = PERE
+                          AND pksitdgene.get_siteclass(1,arasite) = 10
+                          AND DTRT BETWEEN araddeb AND aradfin
+                          AND DTRT BETWEEN resddeb AND resdfin
+                       UNION 
+                       SELECT SEQVL, SITE, PERE,
+                              pkresobj.get_desc(1, PERE,'GB') NOEUD_MAG, null, null, null, null, null, null, null
+                               FROM C_GOLDART
+                              WHERE NOT EXISTS (SELECT 1 FROM artuc, C_VALUES 
+                                                 WHERE aracexr = CEXR
+                                                   AND arasite = SITE
+                                                   AND aracexvl = CEXVL
+                                                   AND DTRT BETWEEN araddeb AND aradfin
+                                                   AND pksitdgene.get_siteclass(1,arasite) = 10)
+                            ),
+           C_ASSWHS_GOLD AS -- Selection des assortiments de l'entrepot
+                            (SELECT SEQVL, 9000 SITE, 9000 PERE, aracfin CFIN_WHS, foucnuf CNUF_WHS, foulibl CNUF_LIB_WHS,
+                                    pkparpostes.get_postlibc(1, 10, 731, arutypul, 'FR') TYPUL_WHS
+                               FROM artuc, C_GOLDART, C_VALUES, foudgene, artul
+                              WHERE aracexr = CEXR
+                                AND aracexvl = CEXVL
+                                ANd aracfin = foucfin
+                                ANd aracinl = arucinl
+                                AND arasite = 9000
+                                AND DTRT BETWEEN araddeb AND aradfin
+                             UNION 
+                             SELECT SEQVL, 9000, 9000, null, null, null, null
+                               FROM C_GOLDART 
+                              WHERE NOT EXISTS (SELECT 1 FROM artuc, C_VALUES
+                                                 WHERE arasite = 9000
+                                                   AND aracexr = CEXR
+                                                   AND aracexvl = CEXVL
+                                                   AND DTRT BETWEEN araddeb AND aradfin)
+                            ),
+           C_PRIXACH_MAG_GOLD AS -- Selection des prix de achat de l'entrepot
+                              (SELECT SEQVL, PERE, CFIN_MAG,
+                                      tappbrut MAG_PA,
+                                      pkparpostes.get_postlibl(1, 10, 7, tapctva, 'FR') TVA_PA,
+                                      tapctva CTVA_PA
+                                 FROM tarprix, C_ASSMAG_GOLD, C_VALUES
+                                WHERE tapseqvl = SEQVL
+                                  AND tapsite = PERE
+                                  AND tapcfin = CFIN_MAG
+                                  AND DTRT BETWEEN tapddeb AND tapdfin
+                               UNION 
+                               SELECT SEQVL, PERE, CFIN_MAG,
+                                      null, null, null
+                                 FROM C_ASSMAG_GOLD
+                                WHERE NOT EXISTS (SELECT 1 FROM tarprix, C_VALUES
+                                                   WHERE tapsite = PERE
+                                                     AND tapseqvl = SEQVL
+                                                     AND tapcfin = CFIN_MAG
+                                                     AND DTRT BETWEEN tapddeb AND tapdfin
+                                                     )
+                              ),
+           C_PRIXREV_MAG_GOLD AS -- Selection des prix de revient de l'entrepot
+                              (SELECT SEQVL, SITE, PERE, CFIN_MAG,
+                                      aprfapn MAG_PAF, aprfrpr MAG_PR
+                                 FROM areprix, C_ASSMAG_GOLD, C_VALUES
+                                WHERE aprseqvl = SEQVL
+                                  AND aprsite = SITE
+                                  AND aprcfin = CFIN_MAG
+                                  AND DTRT BETWEEN aprddeb AND aprdfin
+                               UNION 
+                               SELECT SEQVL, SITE, PERE, CFIN_MAG,
+                                      null, null
+                                 FROM C_ASSMAG_GOLD
+                                WHERE NOT EXISTS (SELECT 1 FROM areprix, C_VALUES
+                                                   WHERE aprsite = SITE
+                                                     AND aprseqvl = SEQVL
+                                                     AND aprcfin = CFIN_MAG
+                                                     AND DTRT BETWEEN aprddeb AND aprdfin)
+                              ), 
+           C_PRIXACH_WHS_GOLD AS -- Selection des prix de achat de l'entrepot
+                              (SELECT SEQVL, SITE, CFIN_WHS,
+                                      tappbrut WHS_PA,
+                                      pkparpostes.get_postlibl(1, 10, 7, tapctva, 'FR') TVA_PA,
+                                      tapctva CTVA_PA
+                                 FROM tarprix, C_ASSWHS_GOLD, C_VALUES
+                                WHERE tapseqvl = SEQVL
+                                  AND tapsite = SITE
+                                  AND tapcfin = CFIN_WHS
+                                  AND DTRT BETWEEN tapddeb AND tapdfin
+                               UNION 
+                               SELECT SEQVL, SITE, CFIN_WHS,
+                                      null, null, null
+                                 FROM C_ASSWHS_GOLD
+                                WHERE NOT EXISTS (SELECT 1 FROM tarprix, C_VALUES
+                                                   WHERE tapsite = SITE
+                                                     AND tapseqvl = SEQVL
+                                                     AND tapcfin = CFIN_WHS
+                                                     AND DTRT BETWEEN tapddeb AND tapdfin
+                                                     )
+                              ),
+           C_PRIXREV_WHS_GOLD AS -- Selection des prix de revient de l'entrepot
+                              (SELECT SEQVL, SITE, CFIN_WHS,
+                                      aprfapn WHS_PAF, aprfrpr WHS_PR
+                                 FROM areprix, C_ASSWHS_GOLD, C_VALUES
+                                WHERE aprseqvl = SEQVL
+                                  AND aprcfin = CFIN_WHS
+                                  AND aprsite = SITE
+                                  AND DTRT BETWEEN aprddeb AND aprdfin
+                               UNION 
+                               SELECT SEQVL, SITE, CFIN_WHS,
+                                      null, null
+                                 FROM C_ASSWHS_GOLD
+                                WHERE NOT EXISTS (SELECT 1 FROM areprix, C_VALUES
+                                                   WHERE aprsite = SITE
+                                                     AND aprseqvl = SEQVL
+                                                     AND aprcfin = CFIN_WHS
+                                                     AND DTRT BETWEEN aprddeb AND aprdfin)
+                              ),
+           C_PRIXGROS AS -- Selection des prix de grossiste de l'entrepot
+                              (SELECT SEQVL, 
+                                      wlgpcsrh MAG_PG, PERE,
+                                      pkparpostes.get_postlibl(1, 10, 7, wlgctva, 'FR') TVA_PG,
+                                      wlgctva CTVA_PG
+                                 FROM wplig, lienwplcli, sitclirel, C_ASSMAG_GOLD, C_VALUES, reseau
+                                WHERE wlgseqvl = SEQVL 
+                                  AND wlgcinwpl = lwccinwpl
+                                  AND sclncli = lwcncli
+                                  AND sclsite = SITE
+                                  AND respere = PERE
+                                  AND ressite = SITE
+                                  AND DTRT BETWEEN sclddeb AND scldfin
+                                  AND DTRT BETWEEN wlgddeb AND wlgdfin
+                                  AND DTRT BETWEEN lwcddeb AND lwcdfin
+                                  AND DTRT BETWEEN resddeb AND resdfin
+                               UNION ALL
+                               SELECT SEQVL, null, PERE,
+                                      null, null
+                                 FROM lienwplcli, sitclirel, reseau, C_ASSMAG_GOLD, C_VALUES
+                                WHERE sclncli = lwcncli
+                                  AND sclsite = SITE
+                                  AND respere = PERE
+                                  AND ressite = SITE
+                                  AND DTRT BETWEEN sclddeb AND scldfin
+                                  AND DTRT BETWEEN lwcddeb AND lwcdfin
+                                  AND DTRT BETWEEN resddeb AND resdfin
+                                  AND NOT EXISTS (SELECT 1 FROM wplig, C_VALUES
+                                                   WHERE wlgseqvl = SEQVL
+                                                     AND wlgcinwpl = lwccinwpl
+                                                     AND DTRT BETWEEN wlgddeb AND wlgdfin)
+                              ),
+            C_PRIXVENTE AS (SELECT SEQVL, SITE, PERE,
+                                   pkprixvente.get_prix_vente(1,arlcinluvc,SITE,'1', DTRT) PV,
+                                   pkparpostes.get_postlibl(1, 10, 7, pkprixvente.get_code_tva(1,arlcinluvc,SITE,'1', DTRT), 'FR') TVA_PV,
+                                   pkprixvente.get_code_tva(1,arlcinluvc,SITE,'1', DTRT) CTVA_PV
+                              FROM artvl, C_GOLDART, C_VALUES
+                             WHERE arlseqvl = SEQVL
+                                
+                           )                        
+      SELECT DISTINCT
+             '||||||||---> ' ARTICLE_GOLD, 
+             C_GOLDART.STRUC, C_GOLDART.STRUCDESC, C_GOLDART.TYPP, C_GOLDART.cexr        , C_GOLDART.cexvl VL           , pkartvl.get_vldesc(1, C_GOLDART.seqvl, 'FR') DESCRIPTION,
+             '||||||||---> ' VENTE_MAGASIN,
+             C_ASSMAG_GOLD.noeud_mag NOEUD_RESEAU, 
+             C_PRIXVENTE.PV, C_PRIXVENTE.TVA_PV , 
+             '||||||||---> ' GOLD_ASS_MAGASIN,
+             C_ASSMAG_GOLD.cnuf_mag,C_ASSMAG_GOLD.cnuf_lib_mag,C_ASSMAG_GOLD.TYPUL_MAG,C_ASSMAG_GOLD.CCOM_MAG, C_PRIXACH_MAG_GOLD.TVA_PA MAG_TVA_PA, C_PRIXACH_MAG_GOLD.mag_pa , 
+             C_PRIXREV_MAG_GOLD.mag_paf, C_PRIXREV_MAG_GOLD.mag_pr, C_PRIXGROS.mag_pg, C_PRIXGROS.TVA_PG,
+             '||||||||---> ' GOLD_ASS_ENTREPOT,
+             C_ASSWHS_GOLD.SITE, 
+             C_ASSWHS_GOLD.cnuf_whs, C_ASSWHS_GOLD.cnuf_lib_whs, C_ASSWHS_GOLD.TYPUL_WHS,C_PRIXACH_WHS_GOLD.TVA_PA WHS_TVA_PA, C_PRIXACH_WHS_GOLD.whs_pa, C_PRIXREV_WHS_GOLD.whs_paf, C_PRIXREV_WHS_GOLD.whs_pr
+        FROM C_VALUES,
+             C_GOLDART,
+             C_ASSMAG_GOLD, 
+             C_ASSWHS_GOLD, 
+             C_PRIXACH_WHS_GOLD,
+             C_PRIXREV_WHS_GOLD,
+             C_PRIXACH_MAG_GOLD,
+             C_PRIXREV_MAG_GOLD,
+             C_PRIXGROS,
+             C_PRIXVENTE
+       WHERE C_ASSMAG_GOLD.SEQVL = C_GOLDART.SEQVL
+         AND C_ASSMAG_GOLD.PERE = C_GOLDART.PERE
+         --
+         AND C_ASSWHS_GOLD.SEQVL = C_GOLDART.SEQVL
+         --
+         AND C_PRIXREV_MAG_GOLD.SEQVL  = C_GOLDART.SEQVL
+         AND C_PRIXACH_MAG_GOLD.SEQVL  = C_GOLDART.SEQVL
+         AND C_PRIXREV_MAG_GOLD.SITE = C_GOLDART.SITE
+         AND C_PRIXACH_MAG_GOLD.PERE  = C_GOLDART.PERE
+         AND NVL(C_PRIXREV_MAG_GOLD.CFIN_MAG, -1)  = NVL(C_ASSMAG_GOLD.CFIN_MAG, -1)
+             AND NVL(C_PRIXACH_MAG_GOLD.CFIN_MAG, -1)  = NVL(C_ASSMAG_GOLD.CFIN_MAG, -1)
+               --
+         AND C_PRIXGROS.SEQVL  = C_GOLDART.SEQVL
+         AND C_PRIXGROS.PERE  = C_GOLDART.PERE
+         AND C_PRIXGROS.SEQVL  = C_GOLDART.SEQVL
+         --
+         AND C_PRIXVENTE.SITE  = C_GOLDART.SITE
+         AND C_PRIXVENTE.SEQVL  = C_GOLDART.SEQVL
+         --
+         AND C_PRIXREV_WHS_GOLD.SEQVL  = C_GOLDART.SEQVL
+         AND C_PRIXACH_WHS_GOLD.SEQVL  = C_GOLDART.SEQVL
+         AND C_PRIXREV_WHS_GOLD.SITE = C_ASSWHS_GOLD.SITE
+         AND C_PRIXACH_WHS_GOLD.SITE = C_ASSWHS_GOLD.SITE
+    ORDER BY C_GOLDART.cexr, C_GOLDART.cexvl, C_ASSMAG_GOLD.noeud_mag 
+  </TXT>
+ <COL>ARTICLE GOLD</COL>
+  <COL>g.Structure</COL> 
+  <COL>g.Desc Structure</COL>
+  <COL>g.Type</COL> 
+  <COL>g.Racine</COL> 
+  <COL>g.VL</COL>
+  <COL>g.Description</COL> 
+ <COL>VENTE MAGASIN</COL> 
+  <COL>v.Noeud Reseau</COL>
+  <COL>v.PV</COL> 
+  <COL>v.TVA</COL> 
+ <COL>ASST MAGASIN GOLD</COL> 
+  <COL>m.Fourn</COL>
+  <COL>m.Libelle</COL> 
+  <COL>m.UniteCde</COL>
+  <COL>m.CCom</COL>
+  <COL>m.TVA</COL>
+  <COL>m.PA</COL>
+  <COL>m.PAF</COL>
+  <COL>m.PR</COL>
+  <COL>m.PG</COL>
+  <COL>m.TVA_PG</COL>
+ <COL>ASST ENTREPOT GOLD</COL> 
+  <COL>e.Entrepot</COL> 
+  <COL>e.Fourn</COL> 
+  <COL>e.Libelle</COL>
+  <COL>e.UniteCde</COL>
+  <COL>e.TVA_PA</COL>
+  <COL>e.PA</COL> 
+  <COL>e.PAF</COL>
+  <COL>e.PR</COL>
+  <VAR>   
+  	<NAME>:RACINE:</NAME> 
+    	<DEFAULT>%</DEFAULT> 
+    	<PROMPT>Racine (% for all)</PROMPT> 
+  </VAR>
+  <VAR>   
+  	<NAME>:VL:</NAME> 
+    	<DEFAULT>%</DEFAULT> 
+    	<PROMPT>VL (% for all)</PROMPT> 
+  </VAR> 
+  <VAR>   
+  	<NAME>:TYPP:</NAME> 
+    	<DEFAULT>%</DEFAULT> 
+    	<PROMPT>Type Article (% for all)</PROMPT> 
+  </VAR> 
+  <VAR>   
+  	<NAME>:CNUF:</NAME> 
+    	<DEFAULT>%</DEFAULT> 
+    	<PROMPT>CNUF (% for all)</PROMPT> 
+  </VAR> 
+  <VAR>   
+  	<NAME>:LIBFOURN:</NAME> 
+    	<DEFAULT>%</DEFAULT> 
+    	<PROMPT>Supplier description (% for all)</PROMPT> 
+  </VAR>
+  <VAR>   
+  	<NAME>:ACTIF:</NAME> 
+    	<DEFAULT>OUI</DEFAULT> 
+    	<PROMPT>Asst. Cde. fourn ext. actif</PROMPT> 
+  </VAR> 
+  <VAR>   
+  	<NAME>:MAGBE:</NAME> 
+    	<DEFAULT>30001</DEFAULT> 
+    	<PROMPT>Magasin BE de ref (-1 pour exclure)</PROMPT> 
+  </VAR> 
+  <VAR>   
+  	<NAME>:MAGLU:</NAME> 
+    	<DEFAULT>30964</DEFAULT> 
+    	<PROMPT>Magasin LUX de ref (-1 pour exclure)</PROMPT> 
+  </VAR>
+  <VAR>   
+  	<NAME>:MAGFR:</NAME> 
+    	<DEFAULT>30609</DEFAULT> 
+    	<PROMPT>Magasin FR de ref (-1 pour exclure)</PROMPT> 
+  </VAR> 
+  <VAR>   
+  	<NAME>:DATEREF:</NAME> 
+    	<DEFAULT>CURRENT_DATE</DEFAULT> 
+    	<PROMPT>Date de recherche (DD/MM/YY)</PROMPT> 
+  </VAR> 
+</ROOT>

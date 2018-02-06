@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<ROOT>
+  <TXT>SELECT  ARTICLE, VL, LIBL, HOPE, CNUF, FOURN, 
+              SUM(storecolis) "QTY ORDERED" , 
+              SUM(storeprep) "QTY TO PREPARE", 
+              (SUM(storeprep) - SUM(storecolis)) "SHORTAGE QTY", 
+              NVL(round(pkstock.getStockDispoEnQteUVC_VL(1,9000, pkartstock.RecupCinlUVC(1, CINL),SEQVL), 0),0)/DECODE(UVUP,0,1,UVUP) stk_gold 
+FROM
+(SELECT pkartrac.Get_Artcexr(1,c.cclcinrc) ARTICLE,
+        pkartvl.Get_Arlcexvl(1,c.cclseqvlc) VL,
+        c.cclcinlc CINL,
+        c.cclseqvlc SEQVL,
+        c.ccluvup UVUP,
+        (SELECT acucode
+          FROM artcoul , artulul
+         WHERE acucinl = allcinlf
+           and  c.cclseqvlc = allseqvlp
+           AND TRUNC(SYSDATE) BETWEEN acuddeb AND acudfin
+           and length(acucode) = 6
+           AND ROWNUM = 1) HOPE,
+        b.tarldesc LIBL,  
+        pkfoudgene.get_CNUF(1,pkartuc.GET_FOURNISSEUR_PRINCIPAL(1,9000,sysdate,c.cclcinlc,c.cclseqvlc,c.cclcinrc,1)) CNUF,
+        pkfoudgene.get_DescriptionCnuf(1,pkfoudgene.get_CNUF(1,pkartuc.GET_FOURNISSEUR_PRINCIPAL(1,9000,sysdate,c.cclcinlc,c.cclseqvlc,c.cclcinrc,1))) FOURN,
+        cclqtec/DECODE(ccluvup,0,1,ccluvup) storecolis, 
+        cclqtep/DECODE(ccluvup,0,1,ccluvup)  storeprep
+FROM ccldetccl c, cdeentcde, sitdgene, tra_artvl b 
+WHERE b.tarlseqvl = c.cclseqvlc
+and b.langue = 'FR' 
+and cclcexcde=ecdcexcde
+AND socsite=ecdsite   
+and cclstatus not in (-2)
+AND (ecdsite = :PARAM_SITE: OR :PARAM_SITE: = -1)
+AND trunc(ecddenvoi)=trunc(to_date(':PARAM_DATE:','DD/MM/RR'))
+UNION ALL
+SELECT pkartrac.Get_Artcexr(1,c.cclcinrc) ARTICLE, 
+       pkartvl.Get_Arlcexvl(1,c.cclseqvlc) VL,
+       c.cclcinlc CINL,
+       c.cclseqvlc SEQVL,
+       c.ccluvup UVUP,
+       (SELECT acucode
+          FROM artcoul , artulul
+         WHERE acucinl = allcinlf
+           and  c.cclseqvlc = allseqvlp
+           AND TRUNC(SYSDATE) BETWEEN acuddeb AND acudfin
+           and length(acucode) = 6
+           AND ROWNUM = 1) HOPE,
+        b.tarldesc LIBL,  
+      pkfoudgene.get_CNUF(1,pkartuc.GET_FOURNISSEUR_PRINCIPAL(1,9000,sysdate,c.cclcinlc,c.cclseqvlc,c.cclcinrc,1)) CNUF,
+      pkfoudgene.get_DescriptionCnuf(1,pkfoudgene.get_CNUF(1,pkartuc.GET_FOURNISSEUR_PRINCIPAL(1,9000,sysdate,c.cclcinlc,c.cclseqvlc,c.cclcinrc,1))) FOURN,
+       cclqtec/DECODE(ccluvup,0,1,ccluvup) storecolis, 
+       cclqtep/DECODE(ccluvup,0,1,ccluvup)  storeprep 
+FROM hccldetccl c, cdeentcde, sitdgene, tra_artvl b
+WHERE b.tarlseqvl = c.cclseqvlc
+and b.langue = 'FR' 
+and cclcexcde=ecdcexcde
+AND socsite=ecdsite   
+and cclstatus not in (-2)
+AND (ecdsite = :PARAM_SITE: OR :PARAM_SITE: = -1)
+AND trunc(ecddenvoi)=trunc(to_date(':PARAM_DATE:','DD/MM/RR'))
+) 
+GROUP BY ARTICLE,VL, CINL,UVUP, LIBL,SEQVL,HOPE,CNUF, FOURN
+ORDER BY ARTICLE, VL
+  </TXT>
+  <COL>Article</COL>
+  <COL>VL</COL>
+  <COL>Description</COL>
+  <COL>Code HOPE</COL>
+  <COL>Code Fournisseur</COL>
+  <COL>Description Fournisseur</COL>
+  <COL>Quantite commandee</COL>
+  <COL>Quantite a preparer</COL>
+  <COL>Penurification</COL>
+  <COL>Stock GOLD</COL>
+  <VAR>
+        <NAME>:PARAM_SITE:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>STORE (-1 for all)</PROMPT>
+</VAR>
+<VAR>
+	<NAME>:PARAM_DATE:</NAME>
+        <DEFAULT>01/01/18</DEFAULT>
+        <PROMPT>COLLECTION DATE (DD/MM/RR)</PROMPT>
+  </VAR>
+</ROOT>

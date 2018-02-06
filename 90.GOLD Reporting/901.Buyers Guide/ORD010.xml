@@ -1,0 +1,650 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<ROOT>
+  <TXT>select DISTINCT wh,
+                buyer,
+                brand,
+                vendor, vendor_desc,
+                ccom,
+                nfilf,
+                
+                -- Affichage de arborescence complet 
+                Top_category,
+                Sub_Category,
+                SubSub_category,
+                -- Fin modif
+                
+                categorie,
+                cle_art,
+                supplier_ref,
+                
+                item_code,
+                pkartvl.get_arlcexvl(1,lv),
+                item_desc_fr, item_desc_gb,item_desc_fl,
+                to_char(araddeb,'DD/MM/YY'), to_char(aradfin,'DD/MM/YY'),
+                nvl(etat_whs, 'Closed'),
+                nvl(etat_store, 'Closed'),
+                typo,
+                flow,
+                upc_code, logistic_code,tu_code, ref_order,
+                ref_douane1, ref_douane2,
+                substitut_code, substitut_lv, substitut_desc,
+                is_substitut_code, is_substitut_lv, is_substitut_desc,
+                item_size ,
+                pu,
+                pu_sku,
+                ti/pu_sku,
+                hi/pu_sku,
+                -- round(ti/pack), round(hi/pack),
+                weight, unit,
+                list_cost, net_cost, currency, retail, round(100*(retail-net_cost)/decode(retail,0,1,retail),2) margin_ttc_percent,
+                round(100*(retail/1.21-net_cost)/decode(retail,0,1,retail/1.21),2) margin_ht_percent,
+                wholesale_price_BE_EX, wholesale_price_BE_IN, wholesale_price_FR, wholesale_price_LU,
+                NVL(aramincde,0) || ' ' || pkparpostes.get_postlibc(1, 0, 806, 41, 'GB'),
+                NVL(fccmini,0) || ' ' || pkparpostes.get_postlibc(1, 0, 806, fccmunit, 'GB'),
+                ROUND(BBD_TOTAL,0) BBD_NBDAYS, ROUND(BBD_STORE,0) BBD_SLSTORE,
+                NVL(boh_cal,0),
+                NVL(boh_gold,0),
+                NVL(qty_onorder_sku,0),
+                (NVL(boh_gold,0) - NVL(qty_onorder_sku,0)),
+                round((NVL(boh_gold,0) -NVL(qty_onorder_sku,0))/pu_sku),
+                NVL(round(boh_cal/pu_sku),0),
+                NVL((SELECT ROUND((NVL(ship_week_1,0)
+                                   +NVL(ship_week_2,0)
+                                   +NVL(ship_week_3,0)
+                                   +NVL(ship_week_4,0)
+                                   +NVL(ship_week_5,0)
+                                   +NVL(ship_week_6,0)
+                                   +NVL(ship_week_7,0))/7) FROM dual),0),
+                NVL(round((SELECT ROUND((NVL(ship_week_1,0)
+                                         +NVL(ship_week_2,0)
+                                         +NVL(ship_week_3,0)
+                                         +NVL(ship_week_4,0)
+                                         +NVL(ship_week_5,0)
+                                         +NVL(ship_week_6,0)
+                                         +NVL(ship_week_7,0))/7) FROM dual) / pu_sku,0),0),
+                NVL(ship_week_1,0),
+                NVL(ship_week_2,0),
+                NVL(ship_week_3,0),
+                NVL(ship_week_4,0),
+                NVL(ship_week_5,0),
+                NVL(ship_week_6,0),
+                NVL(ship_week_7,0),
+                NVL(ship_ytd,0),
+                NVL(round(ship_ytd / pu_sku),0),
+                next_delivery,
+                qty_tbd_sku,
+                NVL(round(qty_tbd_sku/pu_sku),0),
+                (select to_char(lisdpro + lisreap, 'DD/MM/YYYY')
+                   from lienserv
+                  where liscfin = internal_vendor
+                    and lissite = wh
+                    and lisccin = internal_cc_vendor
+                    and lisnfilf = internal_nfilf_vendor
+                    and sysdate between lisddeb and lisdfin) next_order,
+                order1, order1_date, order1_qty, round(order1_qty/pu_sku), order2, order2_date, order2_qty, round(order2_qty/pu_sku),
+                order3, order3_date, order3_qty, round(order3_qty/pu_sku), order4, order4_date, order4_qty, round(order4_qty/pu_sku),
+                order5, order5_date, order5_qty, round(order5_qty/pu_sku),
+                order1, order2, order3, order4, order5,
+                flyer1, flyer2, flyer3, flyer4, flyer5
+ from (select arasite wh,
+                (SELECT uatvaln  FROM artuvattri, artuv WHERE uatccla='BUYER' AND arvcinr=aracinr AND arvcinv=uatcinv AND TRUNC(SYSDATE) BETWEEN uatddeb AND uatdfin and rownum=1) buyer,
+                arasite site,
+                aracean supplier_ref,
+               foucnuf vendor,
+               foulibl vendor_desc,
+               pkfouccom.get_numcontrat(1, araccin) ccom,
+               aracexr item_code,
+               artdlim BBD_TOTAL, artpov BBD_STORE,
+               aranfilf nfilf,
+               aracfin internal_vendor,
+               araddeb,aradfin,
+               araccin internal_cc_vendor,
+               pkparpostes.get_postlibl(1,10, 731,arutypul, 'GB') pu,
+               --pkparpostes.get_postlibl(1,0,955,artetat,'GB') etat,
+               (SELECT pkparpostes.get_postlibl(1,0,1071,aratcde,'GB') FROM artuc c WHERE c.arasite=9000 AND c.aracinl=t.aracinl AND TRUNC(SYSDATE) BETWEEN araddeb AND aradfin AND ROWNUM=1) etat_whs,
+               (SELECT pkparpostes.get_postlibl(1,0,1071,aratcde,'GB') FROM artuc c WHERE c.arasite>30000 AND c.aracinr=t.aracinr AND TRUNC(SYSDATE) BETWEEN araddeb AND aradfin AND ROWNUM=1) etat_store,
+               aranfilf internal_nfilf_vendor,
+               aramincde,
+               aracean ref_order,
+               pkparpostes.get_postlibl(1,0, 1030, arttypp, 'FR') typo,
+               fccmini,
+               fccmunit,
+               araseqvl lv,
+               DECODE(arasite, 9000, 'WAREHOUSE', 'DSD') flow,
+               (SELECT tattlibl
+               FROM artattri, tra_attrival
+               WHERE aatccla='BRAND' AND aatccla=tattccla AND aatcatt=tattcode AND langue='FR' AND aatcinr=aracinr AND TRUNC(SYSDATE) BETWEEN aatddeb AND aatdfin) brand,
+               (SELECT tattlibl
+               FROM artattri, tra_attrival
+               WHERE aatccla='A_PAYS' AND aatccla=tattccla AND aatcatt=tattcode AND langue='FR' AND aatcinr=aracinr) assort,
+               -- Affichage structure marchandise
+                DECODE(PKSTRUCOBJ.get_desc(1, PKSTRUCREL.GET_NIVEAU(1,'1',aracinr,2,SYSDATE),'FR'),
+                       pkstrucobj.get_desc(1, aracinr, 'FR'),'',
+                       PKSTRUCOBJ.get_desc(1, PKSTRUCREL.GET_NIVEAU(1,'1',aracinr,2,SYSDATE),'FR')) Top_category,
+
+                DECODE(PKSTRUCOBJ.get_desc(1, PKSTRUCREL.GET_NIVEAU(1,'1',aracinr,3,SYSDATE),'FR'),
+                       pkstrucobj.get_desc(1, aracinr, 'FR'),'',
+                       PKSTRUCOBJ.get_desc(1, PKSTRUCREL.GET_NIVEAU(1,'1',aracinr,3,SYSDATE),'FR')) Sub_Category,
+               
+                DECODE(PKSTRUCOBJ.get_desc(1,PKSTRUCREL.GET_NIVEAU(1,'1',aracinr,4,SYSDATE),'FR'),
+                       pkstrucobj.get_desc(1, aracinr, 'FR'),'',
+                       PKSTRUCOBJ.get_desc(1,PKSTRUCREL.GET_NIVEAU(1,'1',aracinr,4,SYSDATE),'FR')) SubSub_category,
+                -- Fin modif
+                
+                pkstrucobj.get_desc(1,
+                                   pkstrucrel.GET_CINT_PERE(1,
+                                                            '1',
+                                                            aracinr,
+                                                            CURRENT_DATE),
+                                   'GB') categorie,
+                                   aracexr itemcode,
+                                   pkartvl.get_vldesc(1,araseqvl, 'FR') item_desc_fr,
+                                   pkartvl.get_vldesc(1,araseqvl, 'GB') item_desc_gb,
+                                   pkartvl.get_vldesc(1,araseqvl, 'FL') item_desc_fl,
+                                   (SELECT arlcexr
+                                   FROM artrempl, artvl WHERE TRUNC (SYSDATE) BETWEEN arrddeb AND arrdfin AND arasite=arrsite AND arrseqvlo=araseqvl AND arlseqvl=arrseqvlr and rownum=1) substitut_code,
+                                   (SELECT arlcexvl
+                                   FROM artrempl, artvl WHERE TRUNC (SYSDATE) BETWEEN arrddeb AND arrdfin AND arasite=arrsite AND arrseqvlo=araseqvl AND arlseqvl=arrseqvlr and rownum=1) substitut_lv,
+                                   (SELECT pkstrucobj.get_desc(1,arlcinr,'FR')
+                                   FROM artrempl, artvl WHERE TRUNC (SYSDATE) BETWEEN arrddeb AND arrdfin AND arasite=arrsite AND arrseqvlo=araseqvl AND arlseqvl=arrseqvlr and rownum=1) substitut_desc,
+                                   (SELECT arlcexr
+                                   FROM artrempl, artvl WHERE TRUNC (SYSDATE) BETWEEN arrddeb AND arrdfin AND arasite=arrsite AND arrseqvlr=araseqvl AND arlseqvl=arrseqvlo and rownum=1) is_substitut_code,
+                                   (SELECT arlcexvl
+                                   FROM artrempl, artvl WHERE TRUNC (SYSDATE) BETWEEN arrddeb AND arrdfin AND arasite=arrsite AND arrseqvlr=araseqvl AND arlseqvl=arrseqvlo and rownum=1) is_substitut_lv,
+                                   (SELECT pkstrucobj.get_desc(1,arlcinr,'FR')
+                                   FROM artrempl, artvl WHERE TRUNC (SYSDATE) BETWEEN arrddeb AND arrdfin AND arasite=arrsite AND arrseqvlr=araseqvl AND arlseqvl=arrseqvlo and rownum=1) is_substitut_desc,
+               pkartcoca.get_code_caisse(1, cinl_sku, trunc(CURRENT_DATE)) upc_code,
+               
+               (SELECT acucode
+                  FROM artcoul, artulul
+                 WHERE acucinl = allcinlf
+                   and araseqvl = allseqvlp
+                   AND TRUNC(SYSDATE) BETWEEN acuddeb AND acudfin
+                   and length(acucode) = 6
+                   AND ROWNUM = 1) logistic_code,
+               (SELECT acucode
+                  FROM artcoul, artulul
+                 WHERE acucinl = allcinlf
+                   and araseqvl = allseqvlp
+                   AND TRUNC(SYSDATE) BETWEEN acuddeb AND acudfin
+                   and length(acucode) > 9
+                   AND ROWNUM = 1) tu_code,
+               u.arvpuvc || ' ' ||
+               pkparpostes.get_postlibl(1, 0, 806, u.arvuuvc, 'GB') item_size,
+               (select tmacleart3 from tmc_article where tmacexr=aracexr and tmacexvl=aracexvl and rownum=1) cle_art,
+               t.coef_inner_pck inner,
+               decode(typul, 1, 1,
+                decode(typul, 21, t.coef_inner_pck,
+                    decode(typul, 41, t.coef_pck,
+                      decode(typul, 61, decode(t.coef_lay,-1, 1, t.coef_lay), decode(t.coef_pal,-1, 1, t.coef_pal))))) pack,
+               decode(t.coef_lay,-1, 1, t.coef_lay) ti,
+               decode(t.coef_pal,-1, 1, t.coef_pal) hi,
+               pkartstock.ConvertirQteUl_VL(1,1,
+                                            pkartstock.RecupereCinlDest(1,araseqvl,arutypul),
+                                            araseqvl,1) pu_sku,
+               (select tappbrut
+               from tarprix where pkresrel.isSiteBelongToNode(1,arasite, tapsite,'1')=1
+               and tapcfin=aracfin and tapccin=araccin and trunc(SYSDATE) between tapddeb and tapdfin
+               and tapseqvl=araseqvl and rownum=1) list_cost,
+               (select aprfapn from areprix where aprsite=arasite
+               and aprcfin=aracfin and aprccin=araccin and trunc(SYSDATE) between aprddeb and aprdfin
+               and aprseqvl=araseqvl and rownum=1) net_cost,
+               (select wlgpcsrh from wplig WHERE wlgseqvl=araseqvl
+               and trunc(SYSDATE) between wlgddeb and wlgdfin and wlgcinwpl=46 AND rownum=1) wholesale_price_BE_EX,
+               (select wlgpcsrh from wplig WHERE wlgseqvl=araseqvl
+               and trunc(SYSDATE) between wlgddeb and wlgdfin and wlgcinwpl=49 AND rownum=1) wholesale_price_BE_IN,
+               (select wlgpcsrh from wplig WHERE wlgseqvl=araseqvl
+               and trunc(SYSDATE) between wlgddeb and wlgdfin and wlgcinwpl=47 AND rownum=1) wholesale_price_FR,
+               (select wlgpcsrh from wplig WHERE wlgseqvl=araseqvl
+               and trunc(SYSDATE) between wlgddeb and wlgdfin and wlgcinwpl=48 AND rownum=1) wholesale_price_LU,
+               artndouan ref_douane1,
+               artcero ref_douane2,
+               (select tparlibl
+                  from areprix, tra_parpostes
+                 where aprsite = arasite
+                   and aprcfin = aracfin
+                   and aprccin = araccin
+                   and trunc(CURRENT_DATE) between aprddeb and aprdfin
+                   and aprseqvl = araseqvl
+                   and rownum = 1
+                   AND tpartabl = 805
+                   AND tparpost = fccdevi
+                   AND langue = 'GB'
+                   AND tparcmag = 0) currency,
+               arupbru weight,
+               pkparpostes.get_postlibc(1, 0, 806, aruupds, 'GB') unit,
+               pkprixvente.get_prix_vente_perm(1,
+                                               cinl_sku,
+                                               30001,
+                                               '1',
+                                               trunc(CURRENT_DATE)) retail,
+               round(pkstock.getStockDispoEnQteUVC_VL(1,
+                                                      arasite,
+                                                      cinl_sku,
+                                                      araseqvl),
+                     0) boh_gold,
+                (SELECT NVL(qty,0)
+                FROM (SELECT sum(isaqter) AS qty, isacininv
+                      FROM invsaisie 
+                      WHERE isacinl=cinl_sku 
+                      and isaseqvl = araseqvl
+                      AND isasite=9000 
+                      and isatpos = 0
+                      and isadcre > sysdate -1
+                      GROUP BY isacininv
+                      ORDER BY isacininv DESC)
+                WHERE ROWNUM=1) boh_cal,
+                      (SELECT SUM ((NVL(STOVALI,0) + NVL(STOVALL,0) - NVL(STOVALV,0) + NVL(STOVALE,0) + 
+                       NVL(STOVALC,0) - NVL(STOVALR,0))* NVL(stopurp,0)) 
+                  FROM stocouch
+                  WHERE stosite  = :PARAM_SITE:
+                  AND stocinl  = cinl_sku) stock_value,
+               (select rvmmoym
+                        from raoventmoy
+                       where rvmsite = arasite
+                         and rvmcinv = cinl_sku)  moving_avg,
+               (select sum(smssaiu)
+                        from stomvsemaine
+                       where smssite = arasite
+                         and smscinl = cinl_sku
+                         and smssemaine = to_char(CURRENT_DATE - 7 * 1, 'IYYYIW')) ship_week_1,
+               (select sum(smssaiu)
+                        from stomvsemaine
+                       where smssite = arasite
+                         and smscinl = cinl_sku
+                         and smssemaine = to_char(CURRENT_DATE - 7 * 2, 'IYYYIW')) ship_week_2,
+               (select sum(smssaiu)
+                        from stomvsemaine
+                       where smssite = arasite
+                         and smscinl = cinl_sku
+                         and smssemaine = to_char(CURRENT_DATE - 7 * 3, 'IYYYIW')) ship_week_3,
+               (select sum(smssaiu)
+                        from stomvsemaine
+                       where smssite = arasite
+                         and smscinl = cinl_sku
+                         and smssemaine = to_char(CURRENT_DATE - 7 * 4, 'IYYYIW')) ship_week_4,
+               (select sum(smssaiu)
+                        from stomvsemaine
+                       where smssite = arasite
+                         and smscinl = cinl_sku
+                         and smssemaine = to_char(CURRENT_DATE - 7 * 5, 'IYYYIW')) ship_week_5,
+               (select sum(smssaiu)
+                        from stomvsemaine
+                       where smssite = arasite
+                         and smscinl = cinl_sku
+                         and smssemaine = to_char(CURRENT_DATE - 7 * 6, 'IYYYIW')) ship_week_6,
+               (select sum(smssaiu)
+                        from stomvsemaine
+                       where smssite = arasite
+                         and smscinl = cinl_sku
+                         and smssemaine = to_char(CURRENT_DATE - 7 * 7, 'IYYYIW')) ship_week_7,
+              (select sum(smmsaiu)
+                        from stomvmois
+                       where smmmois between to_char(CURRENT_DATE, 'YYYY') || '01' and
+                             to_char(CURRENT_DATE, 'YYYYMM')
+                         and smmsite = arasite
+                         and smmcinl = cinl_sku)  ship_YTD,
+               (SELECT to_char(MIN(trunc(ecddliv)), 'MM/DD/YYYY')
+                  FROM cdedetcde, cdeentcde
+                 WHERE ecdcincde = dcdcincde
+                   AND ecdsite = arasite
+                   AND dcdseqvl = araseqvl
+                   AND ecdetat = 5) next_delivery,
+              (SELECT SUM(dcdqtec)
+                   FROM cdedetcde, cdeentcde
+                   WHERE ecdcincde = dcdcincde
+                   AND ecdsite > 30000
+                   AND dcdseqvl = araseqvl
+                   and ecdcfin = 781
+                   AND ecdetat IN (5)
+                   AND dcdetat IN (5)) qty_onorder_sku,
+                (SELECT SUM(dcdqtec)
+                   FROM cdedetcde, cdeentcde
+                   WHERE ecdcincde = dcdcincde
+                   AND ecdsite = arasite
+                   AND dcdseqvl = araseqvl
+                   AND ((:PARAM_IMPORT: = 1
+                        AND ecdetat IN (3,5)
+                        AND dcdetat IN (3,5)) OR
+                        (:PARAM_IMPORT: = 0
+                        AND ecdetat IN (5)
+                        AND dcdetat IN (5)))) qty_tbd_sku,
+                   (SELECT DCDCEXCDE
+                   FROM
+                   (SELECT DCDCEXCDE, rownum NB FROM  (SELECT dcdcexcde DCDCEXCDE
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=1) order1,
+                  (SELECT DATECOM
+                   FROM               
+                   (SELECT DATECOM , rownum NB FROM  (SELECT to_char(dcddcom, 'DD/MM/YYYY') || ' - ' || to_char(dcddliv, 'DD/MM/YYYY') DATECOM
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=1) order1_date,
+                   (SELECT DCDQTEC
+                   FROM 
+                   (SELECT DCDQTEC , rownum NB FROM  (SELECT NVL(dcdqtec,0) DCDQTEC
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5))) ORDER BY dcddcre DESC )) WHERE NB=1) order1_qty,
+                  (SELECT DCDCEXCDE
+                   FROM
+                   (SELECT DCDCEXCDE, rownum NB FROM  (SELECT dcdcexcde DCDCEXCDE
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=2) order2,
+                  (SELECT DATECOM
+                   FROM               
+                   (SELECT DATECOM , rownum NB FROM  (SELECT to_char(dcddcom, 'DD/MM/YYYY') || ' - ' || to_char(dcddliv, 'DD/MM/YYYY') DATECOM
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=2) order2_date,
+                   (SELECT DCDQTEC
+                   FROM 
+                   (SELECT DCDQTEC , rownum NB FROM  (SELECT NVL(dcdqtec,0) DCDQTEC
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5))) ORDER BY dcddcre DESC )) WHERE NB=2) order2_qty,
+                 (SELECT DCDCEXCDE
+                   FROM
+                   (SELECT DCDCEXCDE, rownum NB FROM  (SELECT dcdcexcde DCDCEXCDE
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=3) order3,
+                  (SELECT DATECOM
+                   FROM               
+                   (SELECT DATECOM , rownum NB FROM  (SELECT to_char(dcddcom, 'DD/MM/YYYY') || ' - ' || to_char(dcddliv, 'DD/MM/YYYY') DATECOM
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=3) order3_date,
+                   (SELECT DCDQTEC
+                   FROM 
+                   (SELECT DCDQTEC , rownum NB FROM  (SELECT NVL(dcdqtec,0) DCDQTEC
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5))) ORDER BY dcddcre DESC )) WHERE NB=3) order3_qty,
+                  (SELECT DCDCEXCDE
+                   FROM
+                   (SELECT DCDCEXCDE, rownum NB FROM  (SELECT dcdcexcde DCDCEXCDE
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=4) order4,
+                  (SELECT DATECOM
+                   FROM               
+                   (SELECT DATECOM , rownum NB FROM  (SELECT to_char(dcddcom, 'DD/MM/YYYY') || ' - ' || to_char(dcddliv, 'DD/MM/YYYY') DATECOM
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=4) order4_date,
+                   (SELECT DCDQTEC
+                   FROM 
+                   (SELECT DCDQTEC , rownum NB FROM  (SELECT NVL(dcdqtec,0) DCDQTEC
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5))) ORDER BY dcddcre DESC )) WHERE NB=4) order4_qty,
+                  (SELECT DCDCEXCDE
+                   FROM
+                   (SELECT DCDCEXCDE, rownum NB FROM  (SELECT dcdcexcde DCDCEXCDE
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=5) order5,
+                  (SELECT DATECOM
+                   FROM               
+                   (SELECT DATECOM , rownum NB FROM  (SELECT to_char(dcddcom, 'DD/MM/YYYY') || ' - ' || to_char(dcddliv, 'DD/MM/YYYY') DATECOM
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5)))  ORDER BY dcddcre DESC )) WHERE NB=5) order5_date,
+                   (SELECT DCDQTEC
+                   FROM 
+                   (SELECT DCDQTEC , rownum NB FROM  (SELECT NVL(dcdqtec,0) DCDQTEC
+                   FROM cdedetcde WHERE dcdcfin=aracfin AND dcdseqvl=araseqvl AND dcdsite=arasite
+                                   AND ((:PARAM_IMPORT: = 1
+                                   AND dcdetat IN (3,5)) OR
+                                   (:PARAM_IMPORT: = 0
+                                   AND dcdetat IN (5))) ORDER BY dcddcre DESC )) WHERE NB=5) order5_qty,
+                   (SELECT ooscexops || ' - ' || to_char(oosddebpg, 'DD/MM/YYYY') || ' - ' || to_char(oosdfinpg, 'DD/MM/YYYY') || ' - ' ||  NVL(colis_flyer,0)
+                   FROM  (SELECT ooscexops, oosddebpg, oosdfinpg,  SUM(oasqeng) colis_flyer
+                   FROM oprartsit, opros WHERE oasnops=oosnops AND oasseqvl=araseqvl
+                   GROUP BY ooscexops, oosddebpg, oosdfinpg
+                   ORDER BY oosddebpg DESC ) WHERE ROWNUM=1) flyer1,
+                   (SELECT ooscexops || ' - ' || to_char(oosddebpg, 'DD/MM/YYYY') || ' - ' || to_char(oosdfinpg, 'DD/MM/YYYY') || ' - ' ||  NVL(colis_flyer,0) || ' PCK'
+                   FROM  (SELECT ooscexops, oosddebpg, oosdfinpg,  SUM(oasqeng) colis_flyer
+                   FROM oprartsit, opros WHERE oasnops=oosnops AND oasseqvl=araseqvl
+                   GROUP BY ooscexops, oosddebpg, oosdfinpg
+                   ORDER BY oosddebpg DESC ) WHERE ROWNUM=2) flyer2,
+                   (SELECT ooscexops || ' - ' || to_char(oosddebpg, 'DD/MM/YYYY') || ' - ' || to_char(oosdfinpg, 'DD/MM/YYYY') || ' - ' ||  NVL(colis_flyer,0) || ' PCK'
+                   FROM  (SELECT ooscexops, oosddebpg, oosdfinpg,  SUM(oasqeng) colis_flyer
+                   FROM oprartsit, opros WHERE oasnops=oosnops AND oasseqvl=araseqvl
+                   GROUP BY ooscexops, oosddebpg, oosdfinpg
+                   ORDER BY oosddebpg DESC ) WHERE ROWNUM=3) flyer3,
+                   (SELECT ooscexops || ' - ' || to_char(oosddebpg, 'DD/MM/YYYY') || ' - ' || to_char(oosdfinpg, 'DD/MM/YYYY') || ' - ' ||  NVL(colis_flyer,0) || ' PCK'
+                   FROM  (SELECT ooscexops, oosddebpg, oosdfinpg,  SUM(oasqeng) colis_flyer
+                   FROM oprartsit, opros WHERE oasnops=oosnops AND oasseqvl=araseqvl
+                   GROUP BY ooscexops, oosddebpg, oosdfinpg
+                   ORDER BY oosddebpg DESC ) WHERE ROWNUM=4) flyer4,
+                   (SELECT ooscexops || ' - ' || to_char(oosddebpg, 'DD/MM/YYYY') || ' - ' || to_char(oosdfinpg, 'DD/MM/YYYY') || ' - ' ||  NVL(colis_flyer,0) || ' PCK'
+                   FROM  (SELECT ooscexops, oosddebpg, oosdfinpg,  SUM(oasqeng) colis_flyer
+                   FROM oprartsit, opros WHERE oasnops=oosnops AND oasseqvl=araseqvl
+                   GROUP BY ooscexops, oosddebpg, oosdfinpg
+                   ORDER BY oosddebpg DESC ) WHERE ROWNUM=5) flyer5,
+                   arutypul,
+                   araseqvl
+          from (select arasite,
+                       aracfin,
+                       araccin,
+                       aranfilf,
+                       aracexr,
+                       aracexvl,
+                       aracinr,
+           aracean,
+                       araseqvl,ararefc,
+                       aracinl,
+                       aramincde,
+                       araddeb, aradfin,
+                       arutypul typul,
+                       pkartstock.RecupCinlUVC(1, aracinl) cinl_sku,
+                       pkartstock.ConvertirQteUl_VL(1,
+                                                    1,
+                                                    pkartstock.RecupereCinlDest(1,
+                                                    araseqvl,
+                                                    21),
+                                                    araseqvl,
+                                                    1) coef_inner_pck,
+                       pkartstock.ConvertirQteUl_VL(1,
+                                                    1,
+                                                    pkartstock.RecupereCinlDest(1,
+                                                                                araseqvl,
+                                                                                41),
+                                                    araseqvl,
+                                                    1) coef_pck,
+                       pkartstock.ConvertirQteUl_VL(1,
+                                                    1,
+                                                    pkartstock.RecupereCinlDest(1,
+                                                                                araseqvl,
+                                                                                61),
+                                                    araseqvl,
+                                                    1) coef_lay,
+                       pkartstock.ConvertirQteUl_VL(1,
+                                                    1,
+                                                    pkartstock.RecupereCinlDest(1,
+                                                                                araseqvl,
+                                                                                81),
+                                                    araseqvl,
+                                                    1) coef_pal
+                  from artuc, artul
+                  WHERE (arasite = :PARAM_SITE: OR :PARAM_SITE: = -1)
+                  and (trunc(sysdate) between araddeb and aradfin OR
+                       pkstock.getStockDispoEnQteUVC_VL(1, arasite, pkartstock.RecupCinlUVC(1, aracinl), araseqvl) > 0)
+                  and arucinl=aracinl
+                  and aratfou=1) t,
+               foudgene f,
+               artuv u,
+               artul,
+               artrac,
+               fouccom c
+         where f.foucfin = t.aracfin
+           and ((araddeb = (select max(s.araddeb) from artuc s where s.arasite = t.arasite and s.aracfin=t.aracfin and s.araccin = t.araccin and s.aranfilf = t.aranfilf and s.aracinr = t.aracinr and s.araseqvl = t.araseqvl)) or (pkstock.getStockDispoEnQte(num_log => 1,P_SITE  => t.arasite,P_CINL  => t.aracinl) > 0))
+           and araccin = fccccin and artcinr=aracinr
+           and (foucnuf = ':PARAM_VENDOR:' or ':PARAM_VENDOR:' = '-1')
+           AND (SUBSTR(pkstrucobj.get_cext(1,
+                                           pkstrucrel.GET_CINT_PERE(1,
+                                                                    '1',
+                                                                    aracinr,
+                                                                    CURRENT_DATE)),
+                       -4) = LPAD(':PARAM_CATEGORY:', 4, '0') OR
+               ':PARAM_CATEGORY:' = '-1')
+           and u.arvcinv = t.cinl_sku
+           and arucinl = aracinl)
+ order by 1, 2, 4
+  </TXT>
+  <COL>Warehouse</COL>
+  <COL>Buyer</COL>
+  <COL>Brand</COL>
+  <COL>Vendor</COL>
+  <COL>Vendor Desc</COL>
+  <COL>Contract</COL>
+  <COL>Addr Ch</COL>
+  <COL>Top Category</COL>
+  <COL>Sub Category</COL>
+  <COL>Sub-Sub Category</COL>
+  <COL>Category</COL>
+  <COL>Cle Art</COL>
+  <COL>Supplier Reference</COL>
+  <COL>Item Code</COL>
+  <COL>LV</COL>
+  <COL>Item Desc FR</COL>
+  <COL>Item Desc GB</COL>
+  <COL>Item Desc FL</COL>
+  <COL>Deb. Assort</COL>
+  <COL>Fin. Assort</COL>
+  <COL>Status Whs</COL>
+  <COL>Status Store.</COL>
+  <COL>Type</COL>
+  <COL>Flow</COL>
+  <COL>Item UPC</COL>
+  <COL>Item Logistic</COL>
+  <COL>Trade Unit</COL>
+  <COL>Reference</COL>
+  <COL>Custom 1</COL>
+  <COL>Custom 2</COL>
+  <COL>Sub. Code</COL>
+  <COL>Sub. LV</COL>
+  <COL>Sub. Desc</COL>
+  <COL>Is Sub. Code</COL>
+  <COL>Is Sub. LV</COL>
+  <COL>Is Sub. Desc</COL>
+  <COL>Size SKU</COL>
+  <COL>Purchase Unit</COL>
+  <COL>SKU/PU</COL>
+  <COL>PU/Layer</COL>
+  <COL>PU/Pallet</COL>
+  <COL>Weight SKU</COL>
+  <COL>Weight Unit</COL>
+  <COL>Purch. Price</COL>
+  <COL>Net Cost</COL>
+  <COL>Currency</COL>
+  <COL>Regular Retail</COL>
+  <COL>Margin TTC percentage</COL>
+  <COL>Margin HT percentage</COL>
+  <COL>Wholesale BE ex</COL>
+  <COL>Wholesale BE in</COL>
+  <COL>Wholesale FR</COL>
+  <COL>Wholesale LU</COL>
+  <COL>Min. Item</COL>
+  <COL>Min. Contract</COL>
+  <COL>BBD Nb days</COL>
+  <COL>BBD SL Store</COL>  
+  <COL>Stock theo. CAL (SKU)</COL>
+  <COL>Stock theo. GOLD (SKU)</COL>
+  <COL>Open store orders GOLD (SKU)</COL>
+  <COL>Stock dispo. GOLD (SKU)</COL>
+  <COL>Stock dispo. GOLD (PU)</COL>
+  <COL>Stock dispo. CAL (PU)</COL>
+  <COL>Average (7 weeks)  (SKU)</COL>
+  <COL>Average (7 weeks)  (PU)</COL>
+  <COL>Week-1 (SKU)</COL>
+  <COL>Week-2 (SKU)</COL>
+  <COL>Week-3 (SKU)</COL>
+  <COL>Week-4 (SKU)</COL>
+  <COL>Week-5 (SKU)</COL>
+  <COL>Week-6 (SKU)</COL>
+  <COL>Week-7 (SKU)</COL>
+  <COL>YTD  (SKU)</COL>
+  <COL>YTD  (PU)</COL>
+  <COL>Next delivery</COL>
+  <COL>Qty TBD (SKU)</COL>
+  <COL>Qty TBD (PU)</COL>
+  <COL>Next Order date</COL>
+  <COL>Order-1</COL>
+  <COL>Order-1 Date</COL>
+  <COL>Order-1 Qty (SKU)</COL>
+  <COL>Order-1 Qty (PU)</COL>
+  <COL>Order-2</COL>
+  <COL>Order-2 Date</COL>
+  <COL>Order-2 Qty (SKU)</COL>
+  <COL>Order-2 Qty (PU)</COL>
+  <COL>Order-3</COL>
+  <COL>Order-3 Date</COL>
+  <COL>Order-3 Qty (SKU)</COL>
+  <COL>Order-3 Qty (PU)</COL>
+  <COL>Order-4</COL>
+  <COL>Order-4 Date</COL>
+  <COL>Order-4 Qty (SKU)</COL>
+  <COL>Order-4 Qty (PU)</COL>
+  <COL>Order-5</COL>
+  <COL>Order-5 Date</COL>
+  <COL>Order-5 Qty (SKU)</COL>
+  <COL>Order-5 Qty (PU)</COL>
+  <COL>Flyer-1</COL>
+  <COL>Flyer-2</COL>
+  <COL>Flyer-3</COL>
+  <COL>Flyer-4</COL>
+  <COL>Flyer-5</COL>
+  <VAR>
+        <NAME>:PARAM_SITE:</NAME>
+        <DEFAULT>9000</DEFAULT>
+        <PROMPT>Warehouse/Stores (-1 for all)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:PARAM_VENDOR:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Vendor code (-1 for all)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:PARAM_CATEGORY:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Category code (-1 for all)</PROMPT>
+  </VAR>
+  <VAR>
+      <NAME>:PARAM_IMPORT:</NAME>
+      <DEFAULT>0</DEFAULT>
+      <PROMPT>Import (1: Yes, 0: No)</PROMPT>
+  </VAR>
+</ROOT>

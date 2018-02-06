@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+<ROOT> 
+    <TXT>
+        SELECT ooscexops OS, arlcexr RACINE, arlcexvl VL, pkartvl.get_vldesc(1, arlseqvl, 'GB') LIBELLE, pkparpostes.get_postlibc(1, 10, 731, arutypul, 'GB') UL, 
+		       pkfoudgene.get_DescriptionFournisseur(1, opccfin) FOURNISSEUR, 
+		       '|-->' ENGAGEMENT,osddebcde DATE_ENG, sum(osdqret) QTE_ENG_UA, 
+		       '|-->' PRECOMMANDE, opcdcde DATE_CDE, trunc(opcdliv) DATE_LIV, sum(opcqua) QTE_PCDE_UA, sum(opcquvc) QTE_PCDE_UVC, 
+		       '|-->' COMMANDE, sum(dcdqtec) QTE_CDE_UVC
+		  FROM oprartsitd, opros, artvl, artul, oprprecde, cdedetcde
+		 WHERE osdnops = oosnops
+		   ANd oosnops = opcnops
+		   AND opcseqvl = arlseqvl
+		   AND opccinl = arucinl
+		   AND ooscexops like ':NUM_OS:%'
+		   AND osdcinl = opccinl
+		   AND osdseqvl = arlseqvl
+		   AND osdcinl = arucinl
+		   AND osddebcde = opcdeng
+		   AND osdsite = opcsite
+		   AND osdqret != 0
+		   AND opccincde = dcdcincde
+		   AND osdseqvl = dcdseqvl
+		   AND osdcinl = dcdcina
+		   AND osdsite = dcdsite
+		 GROUP BY ooscexops, arlcexr, arlcexvl, opccfin,arlseqvl, osddebcde,arutypul, opcdcde, trunc(opcdliv)
+		UNION
+		SELECT ooscexops OS, arlcexr RACINE, arlcexvl VL, pkartvl.get_vldesc(1, arlseqvl, 'GB') LIBELLE, pkparpostes.get_postlibc(1, 10, 731, arutypul, 'GB') UL, 
+		       pkfoudgene.get_DescriptionFournisseur(1, opccfin) FOURNISSEUR, 
+		       '|-->' ENGAGEMENT,osddebcde DATE_ENG, sum(osdqret) QTE_ENG_UA, 
+		       '|-->' PRECOMMANDE, opcdcde DATE_CDE, trunc(opcdliv) DATE_LIV, sum(opcqua) QTE_PCDE_UA, sum(opcquvc) QTE_PCDE_UVC, 
+		       '|-->' COMMANDE, null
+		  FROM oprartsitd, opros, artvl, artul, oprprecde
+		 WHERE osdnops = oosnops
+		   AND NOT EXISTS ( SELECT 1 FROM cdedetcde
+		                     WHERE opccincde = dcdcincde
+		                       AND osdseqvl = dcdseqvl
+		                       AND osdcinl = dcdcina
+		                       AND osdsite = dcdsite
+		                  )
+		   ANd oosnops = opcnops
+		   AND opcseqvl = arlseqvl
+		   AND opccinl = arucinl
+		   AND ooscexops like ':NUM_OS:%'
+		   AND osdcinl = opccinl
+		   AND osdseqvl = arlseqvl
+		   AND osdcinl = arucinl
+		   AND osddebcde = opcdeng
+		   AND osdsite = opcsite
+		   AND osdqret != 0
+		 GROUP BY ooscexops, arlcexr, arlcexvl, opccfin,arlseqvl, osddebcde,arutypul, opcdcde, trunc(opcdliv)
+		UNION
+		SELECT ooscexops OS, arlcexr RACINE, arlcexvl VL, pkartvl.get_vldesc(1, arlseqvl, 'GB') LIBELLE, pkparpostes.get_postlibc(1, 10, 731, arutypul, 'GB') UL, 
+		       null, 
+		       '|-->', osddebcde DATE_ENG, sum(osdqret) QTE_ENG, 
+		       '|-->', null DATE_CDE, null DATE_LIV, null, null, 
+		       '|-->', null
+		  FROM oprartsitd, opros, artvl, artul
+		 WHERE osdnops = oosnops
+		   AND NOT EXISTS (SELECT 1 FROM oprprecde 
+		                    WHERE oosnops = opcnops
+		                      AND opcseqvl = arlseqvl
+		                      AND opccinl = arucinl
+		                      AND osdcinl = opccinl
+		                      AND osddebcde = opcdeng
+		                      AND osdsite = opcsite
+		                   ) 
+		   AND ooscexops like ':NUM_OS:%'
+		   AND osdseqvl = arlseqvl
+		   AND osdcinl = arucinl
+		   AND osdqret != 0
+		 GROUP BY ooscexops, arlcexr, arlcexvl, arlseqvl, osddebcde, arutypul
+		ORDER BY OS, RACINE, VL, DATE_CDE
+  </TXT>
+  <COL>OS</COL>
+  <COL>RACINE</COL>
+  <COL>VL</COL>
+  <COL>LIBELLE</COL>
+  <COL>UL</COL>
+  <COL>FOURNISSEUR</COL>
+  <COL>ENGAGEMENT</COL>
+  <COL>DATE_ENG</COL>
+  <COL>QTE_ENG_UA</COL>
+  <COL>PRECOMMANDE</COL>
+  <COL>DATE_CDE</COL>
+  <COL>DATE_LIV</COL>
+  <COL>QTE_PCDE_UA</COL>
+  <COL>QTE_PCDE_UVC</COL>
+  <COL>COMMANDE</COL>
+  <COL>QTE_CDE_UVC</COL>
+  <VAR>
+        <NAME>:NUM_OS:</NAME>
+        <DEFAULT>%</DEFAULT>
+        <PROMPT>Num. Operation Speciale (% for all)</PROMPT>
+  </VAR>
+</ROOT>

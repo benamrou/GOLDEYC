@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>
+select wohsite as warehouse, wohweek as week, wohcexr as item, wohcnuf as vendor, wohboh as balance_on_hand, wohship as avg_wk_shipment, wohwoh as wk_on_hand from HEI_WOH where (wohsite = :PARAM_SITE: or :PARAM_SITE: = -1) and (wohcnuf = ':PARAM_VENDOR:' or ':PARAM_VENDOR:' = '-1') and wohweek >= :SWEEK: and :EWEEK: >= wohweek
+  </TXT>
+  <COL>warehouse</COL>
+  <COL>week</COL>
+  <COL>item</COL>
+  <COL>vendor</COL>
+  <COL>balance_on_hand</COL> 
+  <COL>avg_wk_shipment</COL>
+  <COL>wk_on_hand</COL>  
+  <VAR>
+        <NAME>:PARAM_SITE:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Warehouse (-1 for all)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:PARAM_VENDOR:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Vendor (-1 for all)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:SWEEK:</NAME>
+        <DEFAULT>201201</DEFAULT>
+        <PROMPT>Start week (YYYYWW)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:EWEEK:</NAME>
+        <DEFAULT>201252</DEFAULT>
+        <PROMPT>End week (YYYYWW)</PROMPT>
+  </VAR>
+</ROOT>

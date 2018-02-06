@@ -1,3 +1,15 @@
+-----------------------------------------------------------------
+-- Export file for user HNCUSTOM@HN_PROD510                    --
+-- Created by Ahmed  Benamrouche on 2/6/2018, 8:53:09 8:53:09  --
+-----------------------------------------------------------------
+
+set define off
+spool thirdpartycounting_table.log
+
+prompt
+prompt Creating table THIRDPARTY_COUNTING
+prompt ==================================
+prompt
 create table THIRDPARTY_COUNTING
 (
   cntupc      VARCHAR2(20),
@@ -105,3 +117,5 @@ create index THIRDPARTY_COUNTING_I01 on THIRDPARTY_COUNTING (CNTFILE, CNTLGFI)
     maxextents unlimited
   );
 
+
+spool off

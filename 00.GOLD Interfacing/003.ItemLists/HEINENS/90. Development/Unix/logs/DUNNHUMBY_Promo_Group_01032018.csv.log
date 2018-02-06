@@ -1,0 +1,68 @@
+
+SQL*Loader: Release 12.1.0.2.0 - Production on Tue Jan 16 10:36:02 2018
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   DUNNHUMBY_Promo_Group_01032018.csv.ctl
+Data File:      /home/hnpcen/gaia/RECEIVED/DUNNHUMBY_Promo_Group_01032018.csv
+  Bad File:     logs/DUNNHUMBY_Promo_Group_01032018.csv.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 1
+Errors allowed: 100000
+Continuation:    none specified
+Path used:      Direct
+
+Table DUNN_PRICEGROUP, loaded from every logical record.
+Insert option in effect for this table: APPEND
+TRAILING NULLCOLS option in effect
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+DNNDEPT                             FIRST     *   ,       CHARACTER            
+DNNSSDEPT                            NEXT     *   ,       CHARACTER            
+DNNCAT                               NEXT     *   ,       CHARACTER            
+DNNSSCAT                             NEXT     *   ,       CHARACTER            
+DNNCODE                              NEXT     *   ,       CHARACTER            
+DNNUPC                               NEXT     *   ,       CHARACTER            
+DNNLV                                NEXT     *   ,       CHARACTER            
+DNNDESC                              NEXT     *   ,       CHARACTER            
+DNNBRAND                             NEXT     *   ,       CHARACTER            
+DNNPGRP                              NEXT     *   ,       CHARACTER            
+DNNFILE                                                   CONSTANT
+    Value is 'DUNNHUMBY_Promo_Group_01032018.csv'
+DNNLGFI                                                   RECNUM
+DNNDCRE                                                   SYSDATE
+DNNDMAJ                                                   SYSDATE
+DNNUTIL                                                   CONSTANT
+    Value is 'DNNHUMBY'
+
+The following index(es) on table DUNN_PRICEGROUP were processed:
+index HNCUSTOM.DUNN_PRICEGROUP_I01 loaded successfully with 83588 keys
+
+Table DUNN_PRICEGROUP:
+  83588 Rows successfully loaded.
+  0 Rows not loaded due to data errors.
+  0 Rows not loaded because all WHEN clauses were failed.
+  0 Rows not loaded because all fields were null.
+
+Bind array size not used in direct path.
+Column array  rows :    5000
+Stream buffer bytes:  256000
+Read   buffer bytes:60000000
+
+Total logical records skipped:          1
+Total logical records read:         83588
+Total logical records rejected:         0
+Total logical records discarded:        0
+Total stream buffers loaded by SQL*Loader main thread:       18
+Total stream buffers loaded by SQL*Loader load thread:       67
+
+Run began on Tue Jan 16 10:36:02 2018
+Run ended on Tue Jan 16 10:36:03 2018
+
+Elapsed time was:     00:00:00.77
+CPU time was:         00:00:00.16

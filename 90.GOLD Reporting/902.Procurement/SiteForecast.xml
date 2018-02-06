@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>
+
+SELECT pvesite, soclmag, foucnuf, foulibl, aracexr, pkstrucobj.get_desc(1,arucinr,'HN'), pkartstock.ConvertirQteUl(1,1,aracinl, 1), pvdnsem, pvdreel, pvdcalc, pvdcorr , 
+	(SELECT NVL(IEXCORR, IEXCALC)*NVL(IEXVAL,1) FROM fctimpexo WHERE iexnsem=pvdnsem AND pvdeid=iexpveid),
+	(SELECT DECODE(NVL( MAX(AVISTAT), 1), 1, ' ', 2, 'PROMO', ' ')
+          FROM AVEPRIX, ARTUV
+         WHERE ARVCINV = AVICINV AND AVICINV=pvecinl
+       	 AND PVDNSEM BETWEEN TO_CHAR(AVIDDEB - 2, 'YYYYWW') AND TO_CHAR(AVIDFIN, 'YYYYWW')) PROMO  
+FROM fctdetpvh, fctentpvh, artul, artuc, foudgene, sitdgene
+WHERE pvecinl=arucinl 
+AND pveid=pvdeid 
+AND pvesite=socsite
+AND araseqvl=aruseqvl 
+AND aracfin=foucfin
+AND (foucnuf=':PARAM_VENDOR:' or ':PARAM_VENDOR:'='-1')
+AND (ARASITE=PVESITE OR ARASITE IN (1100,1101,1102))
+AND PVDNSEM BETWEEN TO_CHAR(ARADDEB - 2, 'YYYYWW') AND TO_CHAR(ARADFIN, 'YYYYWW')
+AND aratcde = 1
+AND pvdnsem = :SWEEK: 
+AND (pvesite = :PARAM_SITE: or :PARAM_SITE:=-1)
+ORDER BY pvesite, aracexr ASC, pvdnsem DESC
+  
+</TXT>
+  <COL>Site</COL>
+  <COL>Description</COL>
+  <COL>Vendor</COL>
+  <COL>Description</COL>
+  <COL>item</COL>
+  <COL>Description</COL>
+  <COL>Case Pack</COL>
+  <COL>Week</COL>
+  <COL>Real Sales</COL>
+  <COL>Calculated Sales</COL>
+  <COL>Corrected sales</COL>
+  <COL>Promotion impact</COL>
+  <COL>Promo</COL>
+  <VAR>
+        <NAME>:PARAM_SITE:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Store/Warehouse (-1 for all)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:PARAM_VENDOR:</NAME>
+        <DEFAULT>-1</DEFAULT>
+        <PROMPT>Vendor (-1 for all)</PROMPT>
+  </VAR>
+  <VAR>
+        <NAME>:SWEEK:</NAME>
+        <DEFAULT>201652</DEFAULT>
+        <PROMPT>Forecasted week (YYYYWW)</PROMPT>
+  </VAR>
+</ROOT>

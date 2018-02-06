@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>  
+--INTRASTAT ANISERCO BE : IN
+select pkparpostes.get_postvac1(999, 0, 807, fadpays) "Country",
+ 1 "Transaction",
+ 1 "Region",
+ uatvaln "Goods code",
+ sum(ddafqte * ARUPBRU) "Net Mass(Kg)",
+ decode(sum(ARUPBRU * ddafqte), 0, sum(ddafqte), null) "Supplementary",
+ sum(ddafpun * ddafqte) "Value in euro"
+  from cfdenfac,
+       cfdgbfac t,
+       fouadres,
+       foufilie,
+       cliadres,
+       sitclirel,
+       cfddtdoc,
+       artul,
+       artuvattri,
+       clidgene,
+       foudgene
+ where efarfou = gfarfou
+   and efacfin = gfacfin
+   and efacfin = foucfin
+   and foutype != 3
+   and exists (select 1
+          from cfdendoc
+         where edcrfou = efarfou
+           and edccfin = efacfin
+           and edcsite = sclsite
+           and efadatf between sclddeb and scldfin
+           and sclncli = adrncli
+           and adrpays = 56)--BE
+   and efadatf between ffiddeb and ffidfin
+   and efacfin = fadcfin
+   and fficfin = efacfin
+   and efafilf = ffinfilf
+   and fficomm = fadadre
+   and ddarfou = efarfou
+   and ddacfin = efacfin
+   and arucinl = ddacinl
+   and uatccla = 'INTSTAT'
+   and uatcinv = arucinluvc
+   and fadpays != 56
+   and clincli = adrncli
+   and efadatf between  TO_DATE(':D_DEB:', 'DD/MM/RR') and TO_DATE(':D_FIN:', 'DD/MM/RR')
+ group by fadpays, uatvaln
+   
+  </TXT> 
+  <COL>Country</COL>
+  <COL>Transaction</COL> 
+  <COL>Region</COL>
+  <COL>Goods code</COL>
+  <COL>Net Mass(Kg)</COL>
+  <COL>Supplementary</COL>
+  <COL>Value in euro</COL>
+
+  <VAR>  
+  	<NAME>:D_DEB:</NAME> 
+    	<DEFAULT>JJ/MM/AA</DEFAULT> 
+    	<PROMPT>Date debut (format JJ/MM/AA)</PROMPT> 
+    </VAR> 
+  <VAR>  
+  	<NAME>:D_FIN:</NAME> 
+    	<DEFAULT>JJ/MM/AA</DEFAULT> 
+    	<PROMPT>Date fin (format JJ/MM/AA)</PROMPT> 
+    </VAR> 
+    
+</ROOT>

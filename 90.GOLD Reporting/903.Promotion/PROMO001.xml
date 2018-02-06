@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+    <TXT>
+        SELECT oplcexopr,
+           oplnthem,
+           ooscexops,
+           oaochrono,
+           (SELECT foucnuf || ' - ' || foulibl
+              FROM artuc, foudgene
+             WHERE aracfin = foucfin
+               AND araseqvl = oaoseqvl
+               AND aracinr = oaocinr
+               AND oosddebv BETWEEN araddeb AND aradfin
+               AND foutype = 1
+               AND ROWNUM = 1),
+           artcexr,
+               (select arlcexvl from ARTVL where oaoseqvl=arlseqvl),
+           (SELECT tattlibl
+              FROM artattri, tra_attrival
+             WHERE aatccla = 'BRAND'
+               AND aatcinr = oaocinr
+                   and tattccla = aatccla
+                   and langue='GB'
+                   and tattcode = aatcatt
+               AND oosddebv BETWEEN aatddeb AND aatdfin) brand,
+            (SELECT acucode
+              FROM artcoul, artulul
+               WHERE acucinl = allcinlf
+              and oaoseqvl = allseqvlp
+              AND TRUNC(SYSDATE) BETWEEN acuddeb AND acudfin
+              and ACUTCOD = 10
+              AND ROWNUM = 1) GTIN14,
+            (SELECT acucode
+              FROM artcoul, artulul
+               WHERE acucinl = allcinlf
+              and oaoseqvl = allseqvlp
+              AND TRUNC(SYSDATE) BETWEEN acuddeb AND acudfin
+              and ACUTCOD = 5
+              AND length(acucode) = 6
+              AND ROWNUM = 1) logistic_code,    
+            /*(SELECT acucode
+              FROM artcoul
+             WHERE oaocinr = acucinr
+               AND oosddebv BETWEEN acuddeb AND acudfin
+               AND length(acucode) = 6
+               AND ROWNUM = 1) logistic_code,   */ 
+           (SELECT arccode
+              FROM artcoca
+             WHERE oaocinr = arccinr
+               AND oosddebv BETWEEN arcddeb AND arcdfin
+               AND ROWNUM = 1),
+           pkartstock.ConvertirQteUl_VL(1,
+                                        1,
+                                        pkartstock.RecupereCinlDest(1,
+                                                                    oaoseqvl,
+                                                                    41),
+                                        oaoseqvl,
+                                        1) coef_pck,
+           pkstrucobj.get_cext(1,
+                               pkstrucrel.GET_CINT_PERE(1, '1', oaocinr, SYSDATE)) code_categorie,
+           pkstrucobj.get_desc(1,
+                               pkstrucrel.GET_CINT_PERE(1, '1', oaocinr, SYSDATE),
+                               'GB') categorie,
+           pkstrucobj.get_desc(1, oaocinr, 'FR') item_desc,
+           pkstrucobj.get_desc(1, oaocinr, 'FL') item_desc,
+           (select tappbrut
+              from tarprix,
+                   (SELECT aracfin, arasite, araccin, araseqvl
+                      FROM artuc, foudgene, sitdgene, oprsiteos
+                     WHERE aracfin = foucfin
+                       AND araseqvl = oaoseqvl
+                       AND aracinr = oaocinr
+                       and osssite = arasite
+                       and ossnops = oosnops
+                       AND oosddebv BETWEEN araddeb AND aradfin
+                       AND foutype = 1
+                       AND arasite = socsite
+                       and soccmag = 10
+                       AND ROWNUM = 1
+                    UNION
+                    SELECT aracfin, arasite, araccin, araseqvl
+                      FROM artuc, foudgene, sitdgene
+                     WHERE aracfin = foucfin
+                       AND araseqvl = oaoseqvl
+                       AND aracinr = oaocinr
+                       AND oosddebv BETWEEN araddeb AND aradfin
+                       AND foutype = 1
+                       AND arasite = socsite
+                       and soccmag = 0
+                       AND ROWNUM = 1)
+             where pkresrel.isSiteBelongToNode(1, arasite, tapsite, '1') = 1
+               and tapcfin = tapcfin
+               and tapccin = araccin
+               and oosddebv between tapddeb and tapdfin
+               and tapseqvl = araseqvl
+               and rownum = 1) prix_achat,
+           (select aprfapn
+              from areprix,
+                   (SELECT aracfin, arasite, araccin, araseqvl
+                      FROM artuc, foudgene
+                     WHERE aracfin = foucfin
+                       AND araseqvl = oaoseqvl
+                       AND aracinr = oaocinr
+                       AND oosddebv BETWEEN araddeb AND aradfin
+                       AND foutype = 1
+                       AND ROWNUM = 1)
+             where aprsite = arasite
+               and aprcfin = aracfin
+               and aprccin = araccin
+               and oosddebv between aprddeb and aprdfin
+               and aprseqvl = araseqvl
+               and rownum = 1) prix_revient,
+           (select aprfapn
+              from areprix,
+                   (SELECT aracfin, arasite, araccin, araseqvl
+                      FROM artuc, foudgene
+                     WHERE aracfin = foucfin
+                       AND araseqvl = oaoseqvl
+                       AND aracinr = oaocinr
+                       AND oosddebv BETWEEN araddeb AND aradfin
+                       AND foutype = 1
+                       AND ROWNUM = 1)
+             where aprsite = arasite
+               and aprcfin = aracfin
+               and aprccin = araccin
+               and trunc(oplddebcde) between aprddeb and aprdfin
+               and aprseqvl = araseqvl
+               and rownum = 1) prix_revient_promo,
+           (SELECT wlgpcsrh
+              FROM wplig, lienwplcli, sitclirel, oprsiteos
+             WHERE ossnops = oosnops
+               and osssite = sclsite
+               and sclncli = lwcncli
+               and wlgcinwpl = lwccinwpl
+               and oosddebv between lwcddeb and lwcdfin
+               and oosddebv between sclddeb and scldfin
+               and wlgseqvl = oaoseqvl
+               AND oosddebv BETWEEN wlgddeb AND wlgdfin
+               AND ROWNUM = 1) prix_gros,
+           (SELECT wlgpcsrh
+              FROM wplig, lienwplcli, sitclirel, oprsiteos
+             WHERE ossnops = oosnops
+               and osssite = sclsite
+               and sclncli = lwcncli
+               and wlgcinwpl = lwccinwpl
+               and oosddebv between lwcddeb and lwcdfin
+               and oosddebv between sclddeb and scldfin
+               and wlgseqvl = oaoseqvl
+               AND oosddebv BETWEEN wlgddeb AND wlgdfin
+               AND ROWNUM = 1) prix_gros_promo,
+           pkprixvente.get_prix_vente_perm(1,
+                                           pkartstock.RecupCinlUVC(1, oaocinl),
+                                           (SELECT gsdsite FROM grdetsite WHERE gsdngr = oosngr AND oosddebv BETWEEN gsdddeb AND gsddfin AND rownum = 1),
+                                           '1',
+                                           oosddebv) retail,
+           (SELECT aviprix
+              FROM aveprix, avetar, artuv
+             WHERE avintar = aventar
+               AND avenops = oosnops
+               AND arvcinr = oaocinr
+               AND avicinv = arvcinv
+               AND ROWNUM = 1) retail_promo,
+           (SELECT SUM(oasqeng)
+              FROM oprartsit
+             WHERE oasnopr = oaonopr
+               AND oasnops = oosnops
+               AND oaoseqvl = oasseqvl
+               AND oascinl = oaocinl)
+      FROM oprplan, opros, oprartos, artrac
+     WHERE oosnopr = oplnopr
+       AND oaonops = oosnops
+       and artcinr = oaocinr
+        AND (ooscexops like ':NUM_OS:%')
+        ORDER BY 1, 3
+  </TXT>
+  <COL>Plan</COL>
+  <COL>Theme</COL>
+  <COL>Num. OS</COL>
+  <COL>Chrono</COL>
+  <COL>Supplier</COL>
+  <COL>GOLD code</COL>
+  <COL>LV</COL>
+  <COL>Brand</COL>
+  <COL>GTIN14</COL>
+  <COL>Logisitc code</COL>
+  <COL>EAN code</COL>
+  <COL>Nb. per PCK</COL>
+  <COL>Category</COL>
+  <COL>Category Desc FR</COL>
+  <COL>Item Desc FR</COL>
+  <COL>Item Desc NL</COL>
+  <COL>Purch. Price</COL>
+  <COL>Cost Price</COL>
+  <COL>Cost Price Promo</COL>
+  <COL>Wholesale Price</COL>
+  <COL>Wholesale Price Promo</COL>
+  <COL>Permanent Retail</COL>
+  <COL>Promo Retail</COL>
+  <COL>Global Store Commitment</COL>
+  <VAR>
+        <NAME>:NUM_OS:</NAME>
+        <DEFAULT>%</DEFAULT>
+        <PROMPT>Num. Operation Speciale (% for all)</PROMPT>
+  </VAR>
+</ROOT>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+ 
+<ROOT> 
+  <TXT>
+/*begin add*/
+WITH orderID as 
+(SELECT ECDCEXCDE
+            FROM CDEENTCDE, FOUDGENE
+           WHERE TRUNC(ECDDLIV) = TO_DATE(':DTE:', 'MM/DD/YY')
+             AND ECDCFIN = FOUCFIN
+             AND FOUCNUF NOT LIKE 'CD%'),
+/*end add*/
+DETAIL
+  AS (SELECT /*+ materialize */
+       SAPLIBL,
+       FOUCNUF,
+       COMM_ORD,
+       COMM_ORD_DESC,
+       SUM(ROUND(COMM_ORD_QTY, 5)) QTY_ORD,
+       COMM_PREP,
+       COMM_PREP_DESC,
+       SUM(ROUND(COMM_PREP_QTY, 5)) QTY_PREP,
+       SUM(ROUND(COMM_SHIP_QTY, 5)) QTY_SHIP,
+       DECODE(NVL(LIST_TYPE, 1), 1, ' ', 2, 'PROMO', ' ') PRM,
+       TO_CHAR(NEXT_DELIV_DATE, 'MM/DD/YY') DELIV
+       /*begin add*/
+       from (SELECT /*+ materialize */
+       SAPLIBL,
+       FOUCNUF,
+       COMM_ORD,
+       COMM_ORD_DESC,
+       COMM_ORD_QTY,
+       COMM_PREP,
+       COMM_PREP_DESC,
+       COMM_PREP_QTY,
+       COMM_SHIP_QTY,
+       LIST_TYPE,
+       NEXT_DELIV_DATE,
+       rank() over(partition by aracexr order by araddeb desc) rk
+   /*end add*/                 
+FROM (SELECT PKARTRAC.GET_ARTCEXR(1, CCLCINRC) COMM_ORD,
+           PKSTRUCOBJ.GET_DESC(1, CCLCINRC, 'HN') COMM_ORD_DESC,
+           SUM(CCLQTEC / DECODE(CCLUVUP, 0, 1, CCLUVUP)) COMM_ORD_QTY,
+           PKARTRAC.GET_ARTCEXR(1, CCLCINRP) COMM_PREP,
+           PKSTRUCOBJ.GET_DESC(1, CCLCINRP, 'HN') COMM_PREP_DESC,
+           SUM(NVL(CCLQTEP,0) / DECODE(CCLUVUP, 0, 1, CCLUVUP)) COMM_PREP_QTY,
+           SUM(NVL(CCLQTEUPX, 0)) COMM_SHIP_QTY,
+           CCLSEQVLC SEQVL_ORD 
+        FROM CCLDETCCL
+        ,orderID /*add*/
+       WHERE 
+       /*begin remove*/
+       /*CCLCEXCDE IN
+           (SELECT ECDCEXCDE
+            FROM CDEENTCDE, FOUDGENE
+           WHERE TRUNC(ECDDLIV) = TO_DATE(':DTE:', 'MM/DD/YY')
+             AND ECDCFIN = FOUCFIN
+             AND FOUCNUF NOT LIKE 'CD%')*/
+             /*end remove*/
+         cclcexcde = ecdcexcde/*add*/
+         AND CCLSITE = ':SITE:' -- here my lord
+         AND CCLTCDE=1 /* On Stock */
+         AND CCLSTATUS >= 3 /* Exclude Display Orders*/
+         AND TRUNC(CCLDCDE) + 5 > TRUNC(CCLDLIVD)
+       GROUP BY PKARTRAC.GET_ARTCEXR(1, CCLCINRC),
+            PKSTRUCOBJ.GET_DESC(1, CCLCINRC, 'HN'),
+            PKARTRAC.GET_ARTCEXR(1, CCLCINRP),
+            PKSTRUCOBJ.GET_DESC(1, CCLCINRP, 'HN'),
+            CCLSEQVLC,CCLSITE 
+      UNION ALL
+      SELECT PKARTRAC.GET_ARTCEXR(1, CCLCINRC) COMM_ORD,
+           PKSTRUCOBJ.GET_DESC(1, CCLCINRC, 'HN') COMM_ORD_DESC,
+           SUM(CCLQTEC / DECODE(CCLUVUP, 0, 1, CCLUVUP)) COMM_ORD_QTY,
+           PKARTRAC.GET_ARTCEXR(1, CCLCINRP) COMM_PREP,
+           PKSTRUCOBJ.GET_DESC(1, CCLCINRP, 'HN') COMM_PREP_DESC,
+           SUM(NVL(CCLQTEP,0) / DECODE(CCLUVUP, 0, 1, CCLUVUP)) COMM_PREP_QTY,
+           SUM(CCLQTEUPX) COMM_SHIP_QTY,
+           CCLSEQVLC SEQVL_ORD 
+        FROM HCCLDETCCL
+        ,orderID /*add*/
+       WHERE /*beginn removee*//*CCLCEXCDE IN
+           (SELECT ECDCEXCDE
+            FROM CDEENTCDE, FOUDGENE
+           WHERE TRUNC(ECDDLIV) = TO_DATE(':DTE:', 'MM/DD/YY') -- here my lord 050317 5/3/2017 11:00:00 PM
+             AND ECDCFIN = FOUCFIN
+             AND FOUCNUF NOT LIKE 'CD%')*//*end remove*/
+         cclcexcde = ecdcexcde/*add*/
+         AND CCLSITE = ':SITE:'
+         AND CCLTCDE=1 /* On Stock */
+         AND CCLSTATUS >= 3   /*Exclude Display Orders*/
+         AND TRUNC(CCLDCDE) + 5 > TRUNC(CCLDLIVD)
+       GROUP BY PKARTRAC.GET_ARTCEXR(1, CCLCINRC),
+            PKSTRUCOBJ.GET_DESC(1, CCLCINRC, 'HN'),
+            PKARTRAC.GET_ARTCEXR(1, CCLCINRP),
+            PKSTRUCOBJ.GET_DESC(1, CCLCINRP, 'HN'),
+            CCLSEQVLC, CCLSITE),
+       (SELECT ARVCEXR, MAX(AVISTAT) LIST_TYPE
+        FROM AVEPRIX, ARTUV
+       WHERE ARVCINV = AVICINV
+         AND TO_DATE(':DTE:', 'MM/DD/YY') BETWEEN AVIDDEB - 2 AND
+           AVIDFIN
+       GROUP BY ARVCEXR) PROMO,
+       (SELECT DCDCEXR, MIN(TRUNC(ECDDLIV)) NEXT_DELIV_DATE
+        FROM CDEENTCDE, CDEDETCDE
+       WHERE ECDCINCDE = DCDCINCDE
+         AND ECDETAT IN (5, 6)
+         AND DCDETAT IN (5, 6)
+         AND ECDSITE = ':SITE:'
+        GROUP BY DCDCEXR) DELIV_DATE,
+        /*begin remove*/
+       /*(SELECT FOUCNUF, FOUCFIN, UC.ARACEXR
+        FROM ARTUC UC,
+           FOUDGENE,
+           (SELECT ARACEXR, MAX(TRUNC(ARADDEB)) ORD_DDEB
+            FROM ARTUC, FOUDGENE
+           WHERE ARASITE = ':SITE:'
+             AND ARACFIN = FOUCFIN
+             AND ARATFOU = 1 /* Handle the discontinued item, look for 60 days in the past/
+             AND ARADFIN > SYSDATE - 60
+           GROUP BY ARACEXR) TEMP
+           
+           
+       WHERE UC.ARASITE = ':SITE:'
+         AND UC.ARACFIN = FOUCFIN
+         AND UC.ARATFOU = 1
+         AND UC.ARACEXR = TEMP.ARACEXR
+         AND UC.ARADDEB = ORD_DDEB
+         AND ARADFIN > SYSDATE - 60
+       GROUP BY FOUCNUF, FOUCFIN, UC.ARACEXR),*/
+       /*end remove*/
+       ARTUC,FOUDGENE,
+
+       SECAPPRO,
+       LIENSECAPPRO
+   WHERE COMM_ORD = DCDCEXR(+)
+     AND COMM_PREP = DCDCEXR(+)
+     AND COMM_PREP = ARACEXR(+)
+     AND COMM_ORD = ARVCEXR(+) /* Sector Supply Management*/
+     AND LIACFIN = FOUCFIN
+     AND LIACINAP = SAPCINAP
+     AND SAPTYPE = 1 /* Supply sector*/
+     AND LIASITE = ':SITE:'
+     AND ARASITE = ':SITE:'
+     AND ARACFIN = FOUCFIN
+     AND ARATFOU = 1 /* Handle the discontinued item, look for 60 days in the past*/
+     AND ARADFIN > SYSDATE - 60
+     /*begin add*/
+     )
+    
+   where rk=1 /*end add*/
+   GROUP BY SAPLIBL,
+        FOUCNUF,
+        COMM_ORD,
+        COMM_ORD_DESC,
+        COMM_PREP,
+        COMM_PREP_DESC,
+        DECODE(NVL(LIST_TYPE, 1), 1, ' ', 2, 'PROMO', ' '),
+        NEXT_DELIV_DATE        
+  )
+  SELECT SAPLIBL,
+       FOUCNUF,
+       COMM_ORD,
+       COMM_ORD_DESC,
+       QTY_ORD,
+       QTY_PREP,
+       QTY_PREP - QTY_ORD,
+       PRM,
+       DELIV
+  FROM DETAIL
+  order by 1, 2
+  </TXT>
+  <COL>Buyer</COL>
+  <COL>Supplier</COL>
+  <COL>Ord. Comm</COL> 
+  <COL>Ord. Description</COL> 
+  <COL>Ord. Qty</COL>
+  <COL>Prep. Qty</COL>
+  <COL>NS</COL>
+  <COL>Promo</COL>
+  <COL>Next Delivery</COL>
+  <VAR>   
+  	<NAME>:DTE:</NAME> 
+    	<DEFAULT></DEFAULT> 
+    	<PROMPT>Date (MM/DD/YY)</PROMPT> 
+  </VAR> 
+  <VAR>
+        <NAME>:SITE:</NAME>
+        <DEFAULT></DEFAULT>
+        <PROMPT>Warehouse</PROMPT>
+  </VAR>
+</ROOT>

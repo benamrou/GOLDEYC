@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+    <TXT>
+       SELECT ooscexops, oassite, soclmag, foucnuf, fccnum, foulibl , 
+				aracexr, aracexvl,pkstrucobj.get_desc(1,aracinr,'FR'),
+        (SELECT arccode FROM artul, artcoca 
+				 WHERE araseqvl= aruseqvl AND arucinl=arccinv AND TRUNC(SYSDATE) BETWEEN arcddeb AND arcdfin AND arcieti=1),
+				(SELECT acucode FROM artcoul WHERE acucinr= oascinr AND acutcod = 5 AND LENGTH(acucode)=6 AND aracinl=acucinl),
+         aracean, oasqeng
+        from oprartsit, opros, sitdgene, artuc, foudgene, fouccom, artvl
+				WHERE oasnops=oosnops
+        AND socsite=oassite
+        AND aracinl=oascinl 
+				AND arasite=oassite
+				AND araseqvl=arlseqvl
+        AND foucfin=aracfin
+        AND fccccin=araccin
+        AND aratfou=1
+        and trunc(sysdate) between araddeb and aradfin
+        and ooscexops LIKE ':NUM_OS:%'
+				and foulibl LIKE '%:SUPPLIER_NAME:%'	
+				ORDER BY aracexr, oassite ASC
+    </TXT>
+  <COL>OS number</COL>
+  <COL>Store</COL>
+  <COL>Description</COL>
+  <COL>Supplier code</COL>
+  <COL>Contract</COL>
+  <COL>Description</COL>
+  <COL>Item code</COL>
+  <COL>LV</COL>
+  <COL>Description</COL>
+  <COL>EAN code</COL>
+  <COL>HOPE</COL>
+  <COL>Ref. to order</COL>
+  <COL>Commitment</COL>
+  <VAR>
+        <NAME>:NUM_OS:</NAME>
+        <DEFAULT>%</DEFAULT>
+        <PROMPT>Num. Operation Speciale (% for all)</PROMPT>
+  </VAR>
+  <VAR>
+		<NAME>:SUPPLIER_NAME:</NAME>
+        <DEFAULT> </DEFAULT>
+        <PROMPT>Supplier (enter supplier name) </PROMPT>
+  </VAR>
+</ROOT>

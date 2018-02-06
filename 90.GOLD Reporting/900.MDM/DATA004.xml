@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+<ROOT> 
+    <TXT>
+        SELECT DISTINCT foucnuf, foulibl, liscomc || ' - ' ||
+	       pkparpostes.get_postlibl(1,10,114, liscomc, 'FR'),
+           liscomf || ' - ' || pkparpostes.get_postlibl(1,10,114, liscomf, 'FR'),
+           fadlfon, fadiden,
+           (SELECT cctmail FROM foucontact WHERE liscfin=cctcfin
+           AND fadadre=cctadre AND ROWNUM=1)
+           FROM lienserv, foudgene, foufilie, fouadres
+           WHERE liscfin=foucfin
+           AND TRUNC(SYSDATE) BETWEEN lisddeb AND lisdfin
+           AND lisnfilf=ffinfilf
+           AND liscfin=fficfin
+           AND fadadre=fficomm
+           AND liscfin=fadcfin
+  </TXT>
+ <COL>Supplier CODE</COL>
+ <COL>Description</COL>
+ <COL> PO comm. </COL>
+ <COL> Invoice comm. </COL>
+  <COL>GLN</COL> 
+  <COL>TVA ID</COL>
+  <COL>email adress</COL> 
+</ROOT>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+ 
+<ROOT> 
+  <TXT>  
+--Out ANISERCO BE
+with Supp as (select distinct arasite, aracinr, araseqvl, aracfin, araccin, fccdevi, fadpays, fadiden 
+                from artuc, fouccom, fouadres, foufilie, foudgene
+                where araccin = fccccin 
+                and aracfin = fadcfin 
+                and fficfin = aracfin
+                and aranfilf = ffinfilf
+                and fficomm = fadadre
+                and trunc(sysdate) between araddeb and aradfin
+                and trunc(sysdate) between ffiddeb and ffidfin
+                and aratfou = 1
+                and aracfin = foucfin
+                and foutype != 3
+               UNION
+               select distinct arasite, aracinr, araseqvl, aracfin, araccin, fccdevi, fadpays, fadiden 
+                from artuc, fouccom, fouadres, foufilie, foudgene
+                where araccin = fccccin 
+                and aracfin = fadcfin 
+                and fficfin = aracfin
+                and aranfilf = ffinfilf
+                and fficomm = fadadre
+                and trunc(sysdate) >= aradfin
+				and trunc(sysdate) between ffiddeb and ffidfin
+                and aracfin = foucfin
+                and foutype != 3
+                )
+select pkparpostes.get_postvac1(999, 0, 807, adest.adrpays) "Country",
+       1 "Transaction",
+       1 "Region",
+       uatvaln "Goods code",
+       sum(ARUPBRU * abs(stmval)) "Net Mass(Kg)",
+       null "Supplementary",
+       sum(abs(stmvpr)) "Valeu in euro"
+  from stomvt t,
+       artuv,
+       artrac,
+       artuvattri,
+       supp,
+       sitclirel ldest,
+       cliadres adest,
+       sitclirel lsource,
+       cliadres asource,
+       artul,
+       sitdgene
+ where uatccla = 'INTSTAT'
+   and stmsite = socsite
+   and soccmag = 0 --Entrepot
+   and uatcinv = stmcinl
+   and stmcinl = arvcinv
+   and arvcinr = artcinr
+   and arucinl = arvcinv
+   and stmtmvt = 151--Expedition
+   and artcinr = aracinr(+)
+   and stmseqvl = araseqvl(+)
+   and stmsite = arasite(+)
+   and stmdmvt between  TO_DATE(':D_DEB:', 'DD/MM/RR') and TO_DATE(':D_FIN:', 'DD/MM/RR')
+   --and stmdmvt between to_date('01/12/2017', 'DD/MM/YY') and to_date('31/12/2017', 'DD/MM/YY')
+   and stmctpt = ldest.sclsite
+   and stmdmvt between ldest.sclddeb and ldest.scldfin
+   and ldest.sclncli = adest.adrncli
+   and stmsite = lsource.sclsite   
+   and stmdmvt between lsource.sclddeb and lsource.scldfin
+   and lsource.sclncli = asource.adrncli
+   and adest.adrpays != 56--Export hors BE
+   and asource.adrpays = 56--Depuis BE
+ group by adest.adrpays, uatvaln
+
+   
+  </TXT> 
+  <COL>Country</COL>
+  <COL>Transaction</COL> 
+  <COL>Region</COL>
+  <COL>Goods code</COL>
+  <COL>Net Mass(Kg)</COL>
+  <COL>Supplementary</COL>
+  <COL>Value in euro</COL>
+
+  <VAR>  
+  	<NAME>:D_DEB:</NAME> 
+    	<DEFAULT>JJ/MM/AA</DEFAULT> 
+    	<PROMPT>Date debut (format JJ/MM/AA)</PROMPT> 
+    </VAR> 
+  <VAR>  
+  	<NAME>:D_FIN:</NAME> 
+    	<DEFAULT>JJ/MM/AA</DEFAULT> 
+    	<PROMPT>Date fin (format JJ/MM/AA)</PROMPT> 
+    </VAR> 
+    
+</ROOT>

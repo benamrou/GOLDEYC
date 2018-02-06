@@ -1,0 +1,24 @@
+-- Recption Order not sent to Warehouse
+select 'Reception Order' "Flow", ecdcexcde "Order nb",  ecdsite "Site", foucnuf "Supplier code", foulibl "Supplier Desc.", 
+       ecdetat "Status", ecddcom "Order date", ecddliv "Delivery date", ecddenvoi "Collection date", 
+       ecdenvetat  "Status Envoi", (SELECT SUM(dcdral) FROM cdedetcde WHERE ecdcincde=dcdcincde AND dcdetat=5) "To be delivered (SKU)"
+ from cdeentcde, foudgene
+where ecdsite = 9000 AND ecdcfin=foucfin
+and ecdetat=5
+and eCDENVETAT=3
+and not exists (
+select 1
+ from tmc_icsdetor a
+where idrcincde =ecdcincde)
+-- Delivery order not sent to warehouse
+UNION 
+select 'Delivery Order', ecdcexcde "Order nb",  ecdsite "Site", foucnuf "Supplier code", foulibl "Supplier Desc.", 
+       ecdetat "Status", ecddcom "Order date", ecddliv "Delivery date", ecddenvoi "Collection date", 
+       ecdenvetat  etat_envoi, (SELECT SUM(dcdral) FROM cdedetcde WHERE ecdcincde=dcdcincde AND dcdetat=5) "To be delivered (SKU)"
+ from cdeentcde, foudgene
+where ecdsite > 30000 AND ecdcfin=foucfin AND ecdcfin=781
+and ecdetat=5
+and not exists (
+select 1
+ from tmc_icsdeol a
+where iolcincde =ecdcincde)
